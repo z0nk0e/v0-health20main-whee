@@ -1,0 +1,545 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Updated color tokens for healthcare/medical theme with professional grays and purple accent */
+  /* Font variables now handled by Next.js font system */
+
+  --background: oklch(1 0 0); /* Pure white */
+  --foreground: oklch(0.25 0 0); /* Dark gray #1f2937 */
+  --card: oklch(0.97 0 0); /* Light gray #f1f5f9 */
+  --card-foreground: oklch(0.45 0 0); /* Medium gray #6b7280 */
+  --popover: oklch(1 0 0); /* White */
+  --popover-foreground: oklch(0.25 0 0); /* Dark gray */
+  --primary: oklch(0.25 0 0); /* Dark gray #1f2937 */
+  --primary-foreground: oklch(1 0 0); /* White */
+  --secondary: oklch(0.45 0 0); /* Medium gray #6b7280 */
+  --secondary-foreground: oklch(1 0 0); /* White */
+  --muted: oklch(0.97 0 0); /* Light gray #f1f5f9 */
+  --muted-foreground: oklch(0.45 0 0); /* Medium gray */
+  --accent: oklch(0.65 0.15 285); /* Purple #8b5cf6 */
+  --accent-foreground: oklch(1 0 0); /* White */
+  --destructive: oklch(0.55 0.22 25); /* Red for errors */
+  --destructive-foreground: oklch(1 0 0); /* White */
+  --border: oklch(0.92 0 0); /* Light border #e5e7eb */
+  --input: oklch(0.97 0 0); /* Input background #f1f5f9 */
+  --ring: oklch(0.65 0.15 285); /* Purple focus ring */
+  --chart-1: oklch(0.65 0.15 285); /* Purple */
+  --chart-2: oklch(0.25 0 0); /* Dark gray */
+  --chart-3: oklch(0.65 0.18 45); /* Orange */
+  --chart-4: oklch(0.55 0.22 25); /* Red */
+  --chart-5: oklch(0.7 0.15 85); /* Yellow */
+  --radius: 0.5rem;
+  --sidebar: oklch(0.97 0 0); /* Light gray */
+  --sidebar-foreground: oklch(0.25 0 0); /* Dark gray */
+  --sidebar-primary: oklch(1 0 0); /* White */
+  --sidebar-primary-foreground: oklch(0.25 0 0); /* Dark gray */
+  --sidebar-accent: oklch(0.65 0.15 285); /* Purple */
+  --sidebar-accent-foreground: oklch(1 0 0); /* White */
+  --sidebar-border: oklch(0.92 0 0); /* Light border */
+  --sidebar-ring: oklch(0.65 0.15 285); /* Purple */
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.145 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.985 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.65 0.15 285);
+  --accent-foreground: oklch(1 0 0);
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.637 0.237 25.331);
+  --border: oklch(0.269 0 0);
+  --input: oklch(0.269 0 0);
+  --ring: oklch(0.65 0.15 285);
+  --chart-1: oklch(0.65 0.15 285);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.65 0.15 285);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.269 0 0);
+  --sidebar-ring: oklch(0.65 0.15 285);
+}
+
+@theme inline {
+  /* Font family definitions now use Next.js font variables */
+  --font-handwriting: var(--font-handwriting);
+  --font-signature: var(--font-signature);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /* Custom utility classes for prescription pad fonts */
+  .font-handwriting {
+    font-family: var(--font-handwriting);
+  }
+
+  .font-signature {
+    font-family: var(--font-signature);
+  }
+
+  /* Added flowing prescription pad styles for dynamic scroll effect */
+  .flowing-prescription {
+    position: absolute;
+    width: 280px;
+    height: 360px;
+    background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 20px;
+    font-family: var(--font-handwriting);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+    transform-origin: center center;
+    will-change: transform, opacity;
+    backdrop-filter: blur(10px);
+    border-left: 4px solid #8b5cf6;
+  }
+
+  .prescription-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .prescription-logo {
+    font-size: 32px;
+    font-weight: bold;
+    color: #8b5cf6;
+    font-family: serif;
+  }
+
+  .prescription-info {
+    text-align: right;
+    font-size: 12px;
+    color: #64748b;
+  }
+
+  .doctor-name {
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 2px;
+  }
+
+  .clinic-name {
+    font-size: 11px;
+    color: #94a3b8;
+  }
+
+  .prescription-body {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .patient-name {
+    margin-bottom: 15px;
+    font-weight: 500;
+    color: #334155;
+  }
+
+  .medication-line {
+    display: flex;
+    align-items: center;
+    margin: 20px 0;
+    padding: 10px;
+    background: rgba(139, 92, 246, 0.05);
+    border-radius: 4px;
+  }
+
+  .rx-symbol {
+    font-size: 24px;
+    color: #8b5cf6;
+    margin-right: 10px;
+    font-family: serif;
+  }
+
+  .medication {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 16px;
+  }
+
+  .instructions {
+    margin: 15px 0;
+    color: #475569;
+    font-style: italic;
+  }
+
+  .signature-line {
+    margin-top: 30px;
+    padding-top: 15px;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .signature {
+    font-family: var(--font-signature);
+    font-size: 18px;
+    color: #1e293b;
+    transform: rotate(-2deg);
+  }
+}
+
+@layer utilities {
+  .prescription-writing {
+    animation: writeIn 2s ease-out forwards;
+  }
+
+  .prescription-fade-in {
+    animation: fadeInUp 1s ease-out forwards;
+  }
+
+  /* Added floating and spinning animations for prescription parallax */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-spin-slow {
+    animation: spin 8s linear infinite;
+  }
+
+  /* Added radial gradient utility for 3D stack background glow */
+  .bg-gradient-radial {
+    background: radial-gradient(circle, var(--tw-gradient-stops));
+  }
+
+  /* Added 3D transform utilities for prescription stack */
+  .transform-gpu {
+    transform: translate3d(0, 0, 0);
+  }
+
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+
+  /* Added 3D prescription flow card styles for dynamic swerving effect */
+  .prescription-flow-card {
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .prescription-flow-card:hover {
+    box-shadow: 0 16px 64px rgba(0, 0, 0, 0.16), 0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+
+  @keyframes writeIn {
+    from {
+      width: 0;
+      opacity: 0;
+    }
+    to {
+      width: 100%;
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Added float keyframes for gentle up-down motion */
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0px) translateX(0px) rotate(0deg);
+    }
+    25% {
+      transform: translateY(-8px) translateX(3px) rotate(1deg);
+    }
+    50% {
+      transform: translateY(-12px) translateX(-2px) rotate(-0.5deg);
+    }
+    75% {
+      transform: translateY(-6px) translateX(4px) rotate(0.8deg);
+    }
+  }
+
+  /* Enhanced particle floating animations for 3D stack */
+  @keyframes particle-float {
+    0%,
+    100% {
+      transform: translateY(0px) translateX(0px) scale(1);
+    }
+    25% {
+      transform: translateY(-5px) translateX(2px) scale(1.1);
+    }
+    50% {
+      transform: translateY(-8px) translateX(-1px) scale(0.9);
+    }
+    75% {
+      transform: translateY(-3px) translateX(3px) scale(1.05);
+    }
+  }
+
+  /* Added 3D stack specific animations */
+  @keyframes stack-rotate {
+    0% {
+      transform: rotateY(0deg) rotateX(0deg);
+    }
+    25% {
+      transform: rotateY(5deg) rotateX(2deg);
+    }
+    50% {
+      transform: rotateY(0deg) rotateX(-2deg);
+    }
+    75% {
+      transform: rotateY(-5deg) rotateX(1deg);
+    }
+    100% {
+      transform: rotateY(0deg) rotateX(0deg);
+    }
+  }
+
+  @keyframes glow-pulse {
+    0%,
+    100% {
+      opacity: 0.3;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.6;
+      transform: scale(1.1);
+    }
+  }
+
+  .prescription-shadow {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 20px 40px -10px rgba(0, 0, 0, 0.1), 0 0 0 1px
+      rgba(255, 255, 255, 0.05);
+  }
+
+  /* Enhanced 3D shadows for stacked prescription pads */
+  .prescription-3d-shadow {
+    box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.1), 0 8px 16px -4px rgba(0, 0, 0, 0.1), 0 16px 32px -8px
+      rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  }
+
+  /* Enhanced flowing animation keyframes for smooth prescription swerving across screen */
+  @keyframes flow-swerve {
+    0% {
+      transform: translateX(-100px) translateY(100vh) rotate(0deg) scale(0.8);
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    25% {
+      transform: translateX(50px) translateY(75vh) rotate(15deg) scale(0.9);
+    }
+    50% {
+      transform: translateX(-30px) translateY(50vh) rotate(-10deg) scale(1);
+    }
+    75% {
+      transform: translateX(80px) translateY(25vh) rotate(20deg) scale(0.95);
+    }
+    90% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateX(-50px) translateY(-20vh) rotate(-5deg) scale(0.8);
+      opacity: 0;
+    }
+  }
+
+  /* Added dynamic 3D flow animation for prescription cards */
+  @keyframes prescription-3d-flow {
+    0% {
+      transform: translate3d(-200px, 100vh, -100px) rotateX(0deg) rotateY(-45deg) rotateZ(0deg) scale(0.6);
+      opacity: 0;
+    }
+    15% {
+      opacity: 0.8;
+    }
+    25% {
+      transform: translate3d(10vw, 75vh, -50px) rotateX(15deg) rotateY(20deg) rotateZ(10deg) scale(0.8);
+    }
+    50% {
+      transform: translate3d(50vw, 50vh, 0px) rotateX(-10deg) rotateY(-15deg) rotateZ(-5deg) scale(1);
+    }
+    75% {
+      transform: translate3d(80vw, 25vh, -30px) rotateX(20deg) rotateY(25deg) rotateZ(15deg) scale(0.9);
+    }
+    85% {
+      opacity: 0.8;
+    }
+    100% {
+      transform: translate3d(120vw, -10vh, -80px) rotateX(-5deg) rotateY(-30deg) rotateZ(-10deg) scale(0.7);
+      opacity: 0;
+    }
+  }
+
+  /* Added enhanced prescription glow and particle animations for better aesthetics */
+  @keyframes prescription-glow {
+    0%,
+    100% {
+      opacity: 0.6;
+      filter: brightness(1) saturate(1.2);
+    }
+    50% {
+      opacity: 0.8;
+      filter: brightness(1.1) saturate(1.4);
+    }
+  }
+
+  /* Added shimmer effect for prescription cards */
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  .prescription-shimmer {
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.2) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: shimmer 3s ease-in-out infinite;
+  }
+
+  /* Added pulsing glow effect for prescription cards */
+  @keyframes pulse-glow {
+    0%,
+    100% {
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.3), 0 0 40px rgba(139, 92, 246, 0.1), 0 8px 32px rgba(0, 0, 0, 0.12);
+    }
+    50% {
+      box-shadow: 0 0 30px rgba(139, 92, 246, 0.5), 0 0 60px rgba(139, 92, 246, 0.2), 0 12px 48px rgba(0, 0, 0, 0.16);
+    }
+  }
+
+  .flowing-prescriptions-container {
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Added perspective and 3D container styles for prescription flow */
+  .prescription-3d-container {
+    perspective: 1200px;
+    perspective-origin: center center;
+  }
+
+  /* Enhanced 3D prescription flow with more dramatic motion */
+  @keyframes prescription-3d-flow-enhanced {
+    0% {
+      transform: translate3d(-300px, 150vh, -150px) rotateX(-20deg) rotateY(-60deg) rotateZ(-15deg) scale(0.5);
+      opacity: 0;
+      filter: blur(8px) saturate(0.8);
+    }
+    10% {
+      opacity: 0.3;
+      filter: blur(4px) saturate(1);
+    }
+    20% {
+      transform: translate3d(-50px, 80vh, -80px) rotateX(25deg) rotateY(30deg) rotateZ(20deg) scale(0.7);
+      opacity: 0.7;
+      filter: blur(2px) saturate(1.2);
+    }
+    35% {
+      transform: translate3d(20vw, 60vh, -40px) rotateX(-15deg) rotateY(-20deg) rotateZ(-10deg) scale(0.9);
+      opacity: 0.9;
+      filter: blur(1px) saturate(1.3);
+    }
+    50% {
+      transform: translate3d(50vw, 40vh, 20px) rotateX(10deg) rotateY(15deg) rotateZ(8deg) scale(1.1);
+      opacity: 1;
+      filter: blur(0px) saturate(1.4);
+    }
+    65% {
+      transform: translate3d(75vw, 25vh, -20px) rotateX(-25deg) rotateY(-35deg) rotateZ(-18deg) scale(0.95);
+      opacity: 0.9;
+      filter: blur(1px) saturate(1.2);
+    }
+    80% {
+      transform: translate3d(95vw, 10vh, -60px) rotateX(30deg) rotateY(40deg) rotateZ(25deg) scale(0.8);
+      opacity: 0.6;
+      filter: blur(3px) saturate(1);
+    }
+    90% {
+      opacity: 0.3;
+      filter: blur(6px) saturate(0.9);
+    }
+    100% {
+      transform: translate3d(130vw, -20vh, -120px) rotateX(-10deg) rotateY(-50deg) rotateZ(-20deg) scale(0.6);
+      opacity: 0;
+      filter: blur(10px) saturate(0.8);
+    }
+  }
+
+  /* Enhanced glassmorphism effects for better visual appeal */
+  .prescription-glass {
+    backdrop-filter: blur(25px) saturate(200%);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+  }
+}
