@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prescriber Finder</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .form-group { margin: 15px 0; }
+        input, select { padding: 8px; margin: 5px; }
+        button { background: #007cba; color: white; padding: 10px 20px; border: none; cursor: pointer; }
+        .result { border: 1px solid #ddd; margin: 10px 0; padding: 15px; }
+        .distance { color: #666; font-weight: bold; }
+        .specialty { color: #007cba; font-style: italic; }
+    </style>
+</head>
+<body>
+    <h1>💊 Prescriber Finder</h1>
+    <p>Find healthcare providers who prescribe specific medications near you</p>
+    
+    <form id="searchForm">
+        <div class="form-group">
+            <label>Drug Name:</label>
+            <input type="text" id="drug" placeholder="e.g., alprazolam, lisinopril" required>
+        </div>
+        <div class="form-group">
+            <label>ZIP Code:</label>
+            <input type="text" id="zip" placeholder="e.g., 19033" pattern="\d{5}" required>
+        </div>
+        <div class="form-group">
+            <label>Search Radius:</label>
+            <select id="radius">
+                <option value="10">10 miles</option>
+                <option value="20" selected>20 miles</option>
+                <option value="50">50 miles</option>
+                <option value="100">100 miles</option>
+            </select>
+        </div>
+        <button type="submit">🔍 Search Prescribers</button>
+    </form>
+    
+    <div id="results"></div>
+    
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const drug = document.getElementById('drug').value;
+            const zip = document.getElementById('zip').value;
+            const radius = document.getElementById('radius').value;
+            
+            document.getElementById('results').innerHTML = '<p>Searching...</p>';
+            
+            try {
+                const response = await fetch(`prescriber_search_api.php?drug=${encodeURIComponent(drug)}&zip=${zip}&radius=${radius}`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    document.getElementById('results').innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+                    return;
+                }
+                
+                let html = `
+                    <h3>Found ${data.results_count} prescribers near ${data.search_location.city}, ${data.search_location.state} ${data.search_location.zip}</h3>
+                `;
+                
+                data.prescribers.forEach((p, i) => {
+                    html += `
+                        <div class="result">
+                            <h4>${i + 1}. Dr. ${p.name}</h4>
+                            <p><strong>Address:</strong> ${p.address.street}<br>
+                               ${p.address.city}, ${p.address.state} ${p.address.zip}</p>
+                            <p><span class="distance">Distance: ${p.distance_miles} miles</span></p>
+                            <p><strong>Drug:</strong> ${p.drug_prescribed} (${p.total_claims} claims)</p>
+                            ${p.specialty ? `<p class="specialty">Specialty: ${p.specialty}</p>` : ''}
+                        </div>
+                    `;
+                });
+                
+                document.getElementById('results').innerHTML = html;
+                
+            } catch (error) {
+                document.getElementById('results').innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
