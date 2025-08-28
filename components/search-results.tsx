@@ -5,8 +5,7 @@ import { useState, useCallback, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { MapPin, Phone, Lock, Zap, Eye } from "lucide-react"
-import { PayPalButtons } from "@paypal/react-paypal-js"
+import { MapPin, Phone, Lock, Zap, Eye, Check, Star } from "@/lib/simple-icons"
 import type { Prescriber, SearchResponse } from "@/lib/api"
 
 interface SearchResultsProps {
@@ -16,16 +15,63 @@ interface SearchResultsProps {
   onUpgradeToPremium: () => void
 }
 
+const PRICING_TIERS = {
+  freemium: {
+    name: "Free",
+    price: 0,
+    period: "forever",
+    features: ["Non-controlled substances only", "Single zipcode search", "No radius expansion", "Basic provider info"],
+    searchLimit: null,
+    multiDrug: false,
+    multiZipcode: false,
+    controlledSubstances: false,
+  },
+  basic: {
+    name: "Basic",
+    price: 9.99,
+    period: "month",
+    features: ["Single drug searches", "All substance types", "5 searches per month", "Standard API access"],
+    searchLimit: 5,
+    multiDrug: false,
+    multiZipcode: false,
+    controlledSubstances: true,
+  },
+  premium: {
+    name: "Premium",
+    price: 19.99,
+    period: "month",
+    features: ["Multiple drugs simultaneously", "Multiple zipcode searches", "Unlimited searches", "Priority support"],
+    searchLimit: null,
+    multiDrug: true,
+    multiZipcode: true,
+    controlledSubstances: true,
+  },
+  annual: {
+    name: "Annual Premium",
+    price: 199.99,
+    period: "year",
+    originalPrice: 239.88,
+    features: ["Everything in Premium", "2 months free", "Priority customer support", "Early access to new features"],
+    searchLimit: null,
+    multiDrug: true,
+    multiZipcode: true,
+    controlledSubstances: true,
+  },
+}
+
 const PayPalButtonsComponent = ({
   onSuccess,
   onError,
   onCancel,
+  selectedTier = "basic",
 }: {
   onSuccess: () => void
   onError: () => void
   onCancel: () => void
+  selectedTier?: keyof typeof PRICING_TIERS
 }) => {
   const [isProcessing, setIsProcessing] = useState(false)
+  const tier = PRICING_TIERS[selectedTier]
 
   const createOrder = useCallback(async () => {
     setIsProcessing(true)
@@ -36,7 +82,7 @@ const PayPalButtonsComponent = ({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          items: [{ name: "RX Prescribers Premium", price: 9.99, qty: 1 }],
+          items: [{ name: `RX Prescribers ${tier.name}`, price: tier.price, qty: 1 }],
         }),
       })
 
@@ -52,7 +98,7 @@ const PayPalButtonsComponent = ({
       setIsProcessing(false)
       throw error
     }
-  }, [])
+  }, [tier])
 
   const onApprove = useCallback(
     async (data: any) => {
@@ -97,36 +143,129 @@ const PayPalButtonsComponent = ({
   }, [onCancel])
 
   return (
-    <PayPalButtons
-      style={{
-        layout: "vertical",
-        color: "blue",
-        shape: "rect",
-        label: "paypal",
-        height: 45,
-      }}
-      disabled={isProcessing}
-      createOrder={createOrder}
-      onApprove={onApprove}
-      onError={handleError}
-      onCancel={handleCancel}
-    />
+    <div className="text-center p-4 border border-gray-200 rounded-lg bg-gray-50">
+      <p className="text-sm text-gray-600 mb-2">PayPal payment is currently unavailable</p>
+      <Button
+        onClick={onSuccess}
+        className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+      >
+        Continue with Free Trial
+      </Button>
+    </div>
+  )
+}
+
+const PricingModal = ({
+  isOpen,
+  onClose,
+  onSelectTier,
+}: {
+  isOpen: boolean
+  onClose: () => void
+  onSelectTier: (tier: keyof typeof PRICING_TIERS) => void
+}) => {
+  if (!isOpen) return null
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <Card className="w-full max-w-4xl relative max-h-[90vh] overflow-y-auto">
+        <CardHeader>
+          <CardTitle className="text-center text-2xl">Choose Your Plan</CardTitle>
+          <p className="text-center text-muted-foreground">
+            Select the plan that best fits your prescriber search needs
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {Object.entries(PRICING_TIERS).map(([key, tier]) => (
+              <Card
+                key={key}
+                className={`relative cursor-pointer transition-all hover:shadow-lg ${
+                  key === "premium" ? "border-purple-500 ring-2 ring-purple-200" : ""
+                }`}
+                onClick={() => onSelectTier(key as keyof typeof PRICING_TIERS)}
+              >
+                {key === "premium" && (
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <Badge className="bg-purple-600 text-white">
+                      <Star className="w-3 h-3 mr-1" />
+                      Most Popular
+                    </Badge>
+                  </div>
+                )}
+                <CardHeader className="text-center pb-2">
+                  <CardTitle className="text-lg">{tier.name}</CardTitle>
+                  <div className="space-y-1">
+                    <div className="text-3xl font-bold">
+                      ${tier.price}
+                      {tier.price > 0 && <span className="text-sm font-normal">/{tier.period}</span>}
+                    </div>
+                    {tier.originalPrice && (
+                      <div className="text-sm text-muted-foreground line-through">${tier.originalPrice}/year</div>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <ul className="space-y-2">
+                    {tier.features.map((feature, index) => (
+                      <li key={index} className="flex items-start space-x-2 text-sm">
+                        <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Button
+                    className={`w-full ${
+                      key === "freemium"
+                        ? "bg-gray-600 hover:bg-gray-700"
+                        : key === "premium"
+                          ? "bg-purple-600 hover:bg-purple-700"
+                          : "bg-blue-600 hover:bg-blue-700"
+                    }`}
+                  >
+                    {key === "freemium" ? "Current Plan" : "Select Plan"}
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <div className="mt-6 text-center">
+            <Button variant="outline" onClick={onClose} className="bg-transparent">
+              Cancel
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   )
 }
 
 export function SearchResults({ results, isLoading, loadingMessage, onUpgradeToPremium }: SearchResultsProps) {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [showPricingModal, setShowPricingModal] = useState(false)
+  const [selectedTier, setSelectedTier] = useState<keyof typeof PRICING_TIERS>("basic")
+
   const handleUpgradeClick = useCallback(() => {
-    setShowUpgradeModal(true)
+    setShowPricingModal(true)
     onUpgradeToPremium()
   }, [onUpgradeToPremium])
+
+  const handleSelectTier = useCallback((tier: keyof typeof PRICING_TIERS) => {
+    setSelectedTier(tier)
+    setShowPricingModal(false)
+    if (tier !== "freemium") {
+      setShowUpgradeModal(true)
+    }
+  }, [])
 
   const PayPalUpgradeModal = useMemo(() => {
     if (!showUpgradeModal) return null
 
+    const tier = PRICING_TIERS[selectedTier]
+
     const handleSuccess = () => {
       setShowUpgradeModal(false)
-      alert("Payment successful! You now have premium access.")
+      alert(`Payment successful! You now have ${tier.name} access.`)
       window.location.reload()
     }
 
@@ -146,20 +285,28 @@ export function SearchResults({ results, isLoading, loadingMessage, onUpgradeToP
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
         <Card className="w-full max-w-md relative">
           <CardHeader>
-            <CardTitle className="text-center">Upgrade to Premium</CardTitle>
-            <p className="text-center text-muted-foreground">
-              Get full access to provider contact details and prescription history
-            </p>
+            <CardTitle className="text-center">Upgrade to {tier.name}</CardTitle>
+            <p className="text-center text-muted-foreground">{tier.features.join(", ")}</p>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="text-center">
-              <p className="text-2xl font-bold">$9.99</p>
-              <p className="text-sm text-muted-foreground">One-time payment</p>
+              <p className="text-2xl font-bold">${tier.price}</p>
+              <p className="text-sm text-muted-foreground">
+                {tier.period === "forever" ? "Free forever" : `per ${tier.period}`}
+              </p>
+              {tier.originalPrice && (
+                <p className="text-sm text-green-600">Save ${(tier.originalPrice - tier.price).toFixed(2)}!</p>
+              )}
             </div>
 
             <div className="w-full min-h-[120px] flex items-center justify-center">
               <div className="w-full max-w-[300px]">
-                <PayPalButtonsComponent onSuccess={handleSuccess} onError={handleError} onCancel={handleCancel} />
+                <PayPalButtonsComponent
+                  onSuccess={handleSuccess}
+                  onError={handleError}
+                  onCancel={handleCancel}
+                  selectedTier={selectedTier}
+                />
               </div>
             </div>
 
@@ -170,7 +317,12 @@ export function SearchResults({ results, isLoading, loadingMessage, onUpgradeToP
         </Card>
       </div>
     )
-  }, [showUpgradeModal])
+  }, [showUpgradeModal, selectedTier])
+
+  const isFreemiumRestricted = (prescriber: Prescriber) => {
+    // In freemium, hide controlled substances
+    return prescriber.drug.controlled_substance
+  }
 
   if (isLoading) {
     return (
@@ -194,14 +346,24 @@ export function SearchResults({ results, isLoading, loadingMessage, onUpgradeToP
     return null
   }
 
+  const filteredPrescribers = results.is_premium
+    ? results.prescribers
+    : results.prescribers.filter((p) => !isFreemiumRestricted(p))
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">Search Results</h2>
           <p className="text-muted-foreground">
-            Found {results.results_count} providers in {results.search_location.city}, {results.search_location.state}{" "}
-            {results.search_location.zip}
+            Found {filteredPrescribers.length} providers in {results.search_location.city},{" "}
+            {results.search_location.state} {results.search_location.zip}
+            {!results.is_premium && results.prescribers.length > filteredPrescribers.length && (
+              <span className="text-orange-600 ml-2">
+                ({results.prescribers.length - filteredPrescribers.length} controlled substance providers hidden -
+                upgrade to view)
+              </span>
+            )}
           </p>
         </div>
 
@@ -211,7 +373,7 @@ export function SearchResults({ results, isLoading, loadingMessage, onUpgradeToP
             className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
           >
             <Zap className="w-4 h-4 mr-2" />
-            Upgrade to Premium
+            View Plans
           </Button>
         )}
       </div>
@@ -223,9 +385,9 @@ export function SearchResults({ results, isLoading, loadingMessage, onUpgradeToP
               <div className="flex items-center space-x-3">
                 <Lock className="w-5 h-5 text-purple-600" />
                 <div>
-                  <h3 className="font-semibold text-purple-900">Unlock Full Provider Details</h3>
+                  <h3 className="font-semibold text-purple-900">Unlock Premium Features</h3>
                   <p className="text-sm text-purple-700">
-                    Get complete contact information, specialties, and prescription history
+                    Multiple drugs, unlimited searches, controlled substances, and full provider details
                   </p>
                 </div>
               </div>
@@ -235,7 +397,7 @@ export function SearchResults({ results, isLoading, loadingMessage, onUpgradeToP
                 className="border-purple-300 text-purple-700 hover:bg-purple-100 bg-transparent"
               >
                 <Eye className="w-4 h-4 mr-2" />
-                View Full Details
+                View Plans
               </Button>
             </div>
           </CardContent>
@@ -243,7 +405,7 @@ export function SearchResults({ results, isLoading, loadingMessage, onUpgradeToP
       )}
 
       <div className="space-y-4">
-        {results.prescribers.map((prescriber) => (
+        {filteredPrescribers.map((prescriber) => (
           <PrescriberCard
             key={prescriber.npi}
             prescriber={prescriber}
@@ -253,6 +415,11 @@ export function SearchResults({ results, isLoading, loadingMessage, onUpgradeToP
         ))}
       </div>
 
+      <PricingModal
+        isOpen={showPricingModal}
+        onClose={() => setShowPricingModal(false)}
+        onSelectTier={handleSelectTier}
+      />
       {PayPalUpgradeModal}
     </div>
   )

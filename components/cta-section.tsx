@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ArrowRight, Smartphone, Globe, Shield } from "lucide-react"
+import { ArrowRight, Smartphone, Globe, Shield } from "@/lib/simple-icons"
 
 export function CTASection() {
   return (

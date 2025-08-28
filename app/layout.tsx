@@ -1,8 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { Playfair_Display, Source_Sans_3, Kalam, Dancing_Script } from "next/font/google"
-import { ClerkProvider } from "@clerk/nextjs"
-import { PayPalScriptProvider } from "@paypal/react-paypal-js"
+// import { ClerkProvider } from "@clerk/nextjs"
 import "./globals.css"
 
 const playfair = Playfair_Display({
@@ -43,61 +42,37 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-  const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
+  // const clerkPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+  // const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
 
-  const paypalOptions = {
-    "client-id": paypalClientId || "test", // Fallback to prevent empty string
-    currency: "USD",
-    intent: "capture",
+  // if (!clerkPublishableKey) {
+  //   console.warn("[v0] Clerk publishable key not found, authentication will be disabled")
+  // }
+
+  // if (!paypalClientId) {
+  //   console.warn("[v0] PayPal client ID not found, PayPal functionality will be disabled")
+  // }
+
+  const AuthWrapper = ({ children }: { children: React.ReactNode }) => {
+    return <>{children}</>
   }
 
   const PayPalWrapper = ({ children }: { children: React.ReactNode }) => {
-    if (!paypalClientId) {
-      console.warn("[v0] PayPal client ID not found, PayPal functionality will be disabled")
-      return <>{children}</>
-    }
-    return <PayPalScriptProvider options={paypalOptions}>{children}</PayPalScriptProvider>
-  }
-
-  if (publishableKey) {
-    return (
-      <ClerkProvider
-        publishableKey={publishableKey}
-        appearance={{
-          baseTheme: undefined,
-          variables: {
-            colorPrimary: "#8B5CF6",
-            colorBackground: "#FFFFFF",
-            colorInputBackground: "#F8FAFC",
-            colorInputText: "#1E293B",
-          },
-        }}
-      >
-        <PayPalWrapper>
-          <html
-            lang="en"
-            className={`${playfair.variable} ${sourceSans.variable} ${kalam.variable} ${dancingScript.variable} antialiased`}
-          >
-            <body className="font-sans">
-              <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">{children}</div>
-            </body>
-          </html>
-        </PayPalWrapper>
-      </ClerkProvider>
-    )
+    return <>{children}</>
   }
 
   return (
-    <PayPalWrapper>
-      <html
-        lang="en"
-        className={`${playfair.variable} ${sourceSans.variable} ${kalam.variable} ${dancingScript.variable} antialiased`}
-      >
-        <body className="font-sans">
-          <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">{children}</div>
-        </body>
-      </html>
-    </PayPalWrapper>
+    <AuthWrapper>
+      <PayPalWrapper>
+        <html
+          lang="en"
+          className={`${playfair.variable} ${sourceSans.variable} ${kalam.variable} ${dancingScript.variable} antialiased`}
+        >
+          <body className="font-sans">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">{children}</div>
+          </body>
+        </html>
+      </PayPalWrapper>
+    </AuthWrapper>
   )
 }

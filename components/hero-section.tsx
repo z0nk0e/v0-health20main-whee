@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Search, MapPin, Clock, Shield, Sparkles } from "lucide-react"
+import { Search, MapPin, Clock, Shield, Sparkles } from "@/lib/simple-icons"
 import { AnimatedText } from "./animated-text"
 import { SearchOverlay } from "./search-overlay"
 
@@ -33,44 +33,53 @@ export function HeroSection() {
 
   return (
     <>
-      <section className="relative overflow-hidden bg-gradient-to-b from-background to-muted/20 py-20 md:py-32">
+      <section className="relative overflow-hidden bg-gradient-to-br from-background via-background to-accent/5 py-24 md:py-40">
         <div className="absolute inset-0 overflow-hidden">
           <div
-            className="absolute -top-40 -right-40 w-80 h-80 bg-accent/10 rounded-full blur-3xl animate-pulse"
+            className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-accent/20 to-secondary/10 rounded-full blur-3xl animate-pulse transform-3d"
             style={{
-              transform: `translate(${mousePosition.x * 0.02}px, ${mousePosition.y * 0.02}px)`,
+              transform: `translate3d(${mousePosition.x * 0.03}px, ${mousePosition.y * 0.03}px, 0) rotateX(${mousePosition.y * 0.01}deg) rotateY(${mousePosition.x * 0.01}deg)`,
             }}
           />
           <div
-            className="absolute -bottom-40 -left-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl animate-pulse"
+            className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-tr from-primary/15 to-accent/10 rounded-full blur-3xl animate-pulse transform-3d"
             style={{
-              transform: `translate(${mousePosition.x * -0.01}px, ${mousePosition.y * -0.01}px)`,
+              transform: `translate3d(${mousePosition.x * -0.02}px, ${mousePosition.y * -0.02}px, 0) rotateX(${mousePosition.y * -0.01}deg) rotateY(${mousePosition.x * -0.01}deg)`,
             }}
+          />
+          <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-accent/30 rounded-full animate-float" />
+          <div
+            className="absolute top-3/4 right-1/4 w-1 h-1 bg-secondary/40 rounded-full animate-float"
+            style={{ animationDelay: "2s" }}
+          />
+          <div
+            className="absolute top-1/2 right-1/3 w-1.5 h-1.5 bg-accent/25 rounded-full animate-float"
+            style={{ animationDelay: "4s" }}
           />
         </div>
 
         <div className="container mx-auto px-4 relative z-10">
-          <div className="mx-auto max-w-4xl text-center">
+          <div className="mx-auto max-w-5xl text-center">
             <Badge
               variant="secondary"
-              className={`mb-6 px-4 py-2 transition-all duration-700 hover:scale-105 hover:shadow-lg ${
+              className={`mb-8 px-6 py-3 text-sm font-medium glass-card border border-accent/20 transition-all duration-700 hover:scale-110 hover:shadow-xl hover:bg-accent/10 cursor-default ${
                 isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
               }`}
             >
-              <Sparkles className="w-3 h-3 mr-1 animate-pulse" />
+              <Sparkles className="w-4 h-4 mr-2 animate-pulse text-accent" />
               Trusted by 825K+ Healthcare Providers
             </Badge>
 
-            <h1 className="font-playfair text-4xl font-bold tracking-tight md:text-6xl lg:text-7xl">
+            <h1 className="font-serif text-5xl font-bold tracking-tight md:text-7xl lg:text-8xl leading-tight">
               <AnimatedText text="Find Healthcare Providers Who " animationType="slide" delay={200} stagger={30} />
-              <span className="bg-gradient-to-r from-accent to-accent/80 bg-clip-text text-transparent">
+              <span className="kinetic-text bg-gradient-to-r from-accent via-secondary to-accent bg-clip-text text-transparent animate-gradient-x">
                 <AnimatedText text="Prescribe" animationType="bounce" delay={800} stagger={80} />
               </span>
               <AnimatedText text=" Your Medications" animationType="fade" delay={1200} stagger={40} />
             </h1>
 
             <p
-              className={`mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl transition-all duration-1000 delay-[1800ms] ${
+              className={`mx-auto mt-8 max-w-3xl text-xl text-muted-foreground md:text-2xl leading-relaxed transition-all duration-1000 delay-[1800ms] ${
                 isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
               }`}
             >
@@ -79,46 +88,46 @@ export function HeroSection() {
             </p>
 
             <Card
-              className={`mx-auto mt-12 max-w-2xl p-6 shadow-xl transition-all duration-1000 delay-[2000ms] hover:shadow-2xl hover:scale-[1.02] ${
+              className={`mx-auto mt-16 max-w-3xl p-8 glass-card border border-border/30 shadow-2xl transition-all duration-1000 delay-[2000ms] card-3d hover:shadow-3xl ${
                 isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
               }`}
             >
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div className="relative group">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-accent" />
+                  <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground transition-all duration-300 group-focus-within:text-accent group-focus-within:scale-110" />
                   <Input
                     placeholder="Enter medication name (e.g., Metformin, Lisinopril, Adderall)"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onFocus={handleSearchFocus}
-                    className="pl-10 h-12 text-base transition-all duration-300 focus:ring-2 focus:ring-accent/20 hover:border-accent/50 cursor-pointer"
+                    className="pl-12 h-14 text-lg glass-card border-border/30 transition-all duration-300 focus:ring-2 focus:ring-accent/30 hover:border-accent/50 cursor-pointer hover:shadow-lg"
                   />
                 </div>
 
                 <div className="relative group">
-                  <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-accent" />
+                  <MapPin className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground transition-all duration-300 group-focus-within:text-accent group-focus-within:scale-110" />
                   <Input
                     placeholder="Enter your location (city, state, or ZIP code)"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     onFocus={handleSearchFocus}
-                    className="pl-10 h-12 text-base transition-all duration-300 focus:ring-2 focus:ring-accent/20 hover:border-accent/50 cursor-pointer"
+                    className="pl-12 h-14 text-lg glass-card border-border/30 transition-all duration-300 focus:ring-2 focus:ring-accent/30 hover:border-accent/50 cursor-pointer hover:shadow-lg"
                   />
                 </div>
 
                 <Button
                   size="lg"
-                  className="w-full h-12 text-base font-semibold transition-all duration-300 hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] group"
+                  className="w-full h-16 text-lg font-semibold bg-gradient-to-r from-accent to-secondary hover:from-accent/90 hover:to-secondary/90 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] group border-0 rounded-xl"
                   onClick={handleSearchFocus}
                 >
-                  <Search className="w-4 h-4 mr-2 transition-transform group-hover:scale-110" />
+                  <Search className="w-5 h-5 mr-3 transition-transform group-hover:scale-110 group-hover:rotate-12" />
                   Find Providers Near Me
                 </Button>
               </div>
             </Card>
 
             <div
-              className={`mt-12 grid grid-cols-1 gap-6 md:grid-cols-3 transition-all duration-1000 delay-[2200ms] ${
+              className={`mt-16 grid grid-cols-1 gap-8 md:grid-cols-3 transition-all duration-1000 delay-[2200ms] ${
                 isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
               }`}
             >
@@ -129,12 +138,12 @@ export function HeroSection() {
               ].map(({ icon: Icon, text, delay }, index) => (
                 <div
                   key={index}
-                  className={`flex items-center justify-center space-x-2 text-sm text-muted-foreground transition-all duration-700 hover:text-accent hover:scale-105 cursor-default ${delay} ${
+                  className={`flex items-center justify-center space-x-3 text-base text-muted-foreground glass-card p-4 rounded-xl border border-border/20 transition-all duration-700 hover:text-accent hover:scale-110 hover:shadow-lg cursor-default modern-hover ${delay} ${
                     isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
                   }`}
                 >
-                  <Icon className="h-4 w-4 text-accent transition-transform hover:rotate-12" />
-                  <span>{text}</span>
+                  <Icon className="h-5 w-5 text-accent transition-transform hover:rotate-12 hover:scale-125" />
+                  <span className="font-medium">{text}</span>
                 </div>
               ))}
             </div>
