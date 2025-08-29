@@ -1,14 +1,13 @@
-// components/Header.tsx (This is now a Server Component)
 
 import {
   NavigationMenu,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-} from "@/components/ui/navigation-menu";
-import Link from "next/link";
-import Image from "next/image";
-import { AuthSection } from "./AuthSection"; // <-- IMPORT our new client component
+} from "@/components/ui/navigation-menu"
+import Link from "next/link"
+import Image from "next/image"
+import { AuthSection } from "./AuthSection" // <-- We only need this one new import
 
 export function Header() {
   return (
@@ -27,9 +26,9 @@ export function Header() {
           </Link>
         </div>
 
+        {/* YOUR ORIGINAL NAVIGATION MENU - FULLY PRESERVED */}
         <NavigationMenu className="hidden md:flex">
           <NavigationMenuList className="space-x-2">
-            {/* ... Your NavigationMenuItems are unchanged ... */}
             <NavigationMenuItem>
               <Link href="/how-it-works" legacyBehavior passHref>
                 <NavigationMenuLink className="group inline-flex h-12 w-max items-center justify-center rounded-xl bg-background/50 backdrop-blur-sm px-6 py-2 text-sm font-medium transition-all duration-300 hover:bg-accent/10 hover:text-accent-foreground hover:scale-105 hover:shadow-lg focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 border border-border/20">
@@ -54,11 +53,11 @@ export function Header() {
           </NavigationMenuList>
         </NavigationMenu>
 
-        {/* --- THIS IS THE ONLY PART THAT CHANGED --- */}
-        {/* We now render our self-contained client component here */}
-        <AuthSection />
-        
+        {/* THE ONLY CHANGE IS REPLACING THE AUTH LOGIC WITH THIS ONE COMPONENT */}
+        <div className="flex items-center space-x-3">
+            <AuthSection />
+        </div>
       </div>
     </header>
-  );
+  )
 }
