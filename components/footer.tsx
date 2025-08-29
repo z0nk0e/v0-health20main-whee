@@ -1,7 +1,10 @@
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
-import Image from "next/image"
+// components/footer.tsx (This is a Server Component)
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import Image from "next/image";
+import { FooterAuthLinks } from "./FooterAuthLinks"; // <-- IMPORT our new client component
 
 export function Footer() {
   return (
@@ -29,12 +32,12 @@ export function Footer() {
             <h4 className="font-semibold">Product</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <a href="#" className="hover:text-foreground transition-colors">
+                <a href="/how-it-works" className="hover:text-foreground transition-colors">
                   How It Works
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-foreground transition-colors">
+                <a href="/#search" className="hover:text-foreground transition-colors">
                   Search Providers
                 </a>
               </li>
@@ -55,6 +58,9 @@ export function Footer() {
           <div className="space-y-4">
             <h4 className="font-semibold">Support</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
+              {/* --- THIS IS WHERE WE ADD THE DYNAMIC LINKS --- */}
+              <FooterAuthLinks />
+
               <li>
                 <a href="#" className="hover:text-foreground transition-colors">
                   Help Center
@@ -66,12 +72,12 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-foreground transition-colors">
+                <a href="/privacy" className="hover:text-foreground transition-colors">
                   Privacy Policy
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-foreground transition-colors">
+                <a href="/terms" className="hover:text-foreground transition-colors">
                   Terms of Service
                 </a>
               </li>
@@ -96,10 +102,10 @@ export function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center text-sm text-muted-foreground">
           <p>© 2024 RX Prescribers. All rights reserved.</p>
           <div className="flex space-x-4 mt-4 md:mt-0">
-            <a href="#" className="hover:text-foreground transition-colors">
+            <a href="/privacy" className="hover:text-foreground transition-colors">
               Privacy
             </a>
-            <a href="#" className="hover:text-foreground transition-colors">
+            <a href="/terms" className="hover:text-foreground transition-colors">
               Terms
             </a>
             <a href="#" className="hover:text-foreground transition-colors">
@@ -109,5 +115,5 @@ export function Footer() {
         </div>
       </div>
     </footer>
-  )
+  );
 }
