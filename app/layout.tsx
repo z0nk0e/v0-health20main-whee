@@ -1,7 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { Playfair_Display, Source_Sans_3, Kalam, Dancing_Script } from "next/font/google"
-// import { ClerkProvider } from "@clerk/nextjs"
+import { ClerkProvider } from "@clerk/nextjs"
 import "./globals.css"
 
 const playfair = Playfair_Display({
@@ -42,16 +42,16 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  // const clerkPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-  // const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
+  const clerkPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+  const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
 
-  // if (!clerkPublishableKey) {
-  //   console.warn("[v0] Clerk publishable key not found, authentication will be disabled")
-  // }
+  if (!clerkPublishableKey) {
+  console.warn("[v0] Clerk publishable key not found, authentication will be disabled")
+   }
 
-  // if (!paypalClientId) {
-  //   console.warn("[v0] PayPal client ID not found, PayPal functionality will be disabled")
-  // }
+  if (!paypalClientId) {
+    console.warn("[v0] PayPal client ID not found, PayPal functionality will be disabled")
+   }
 
   const AuthWrapper = ({ children }: { children: React.ReactNode }) => {
     return <>{children}</>
