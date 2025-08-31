@@ -54,6 +54,9 @@ export default function RootLayout({
    }
 
   const AuthWrapper = ({ children }: { children: React.ReactNode }) => {
+    if (clerkPublishableKey) {
+      return <ClerkProvider publishableKey={clerkPublishableKey}>{children}</ClerkProvider>
+    }
     return <>{children}</>
   }
 
