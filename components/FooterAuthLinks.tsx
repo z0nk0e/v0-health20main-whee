@@ -6,6 +6,13 @@ import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import Link from "next/link";
 
 export function FooterAuthLinks() {
+  const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+
+  if (!clerkKey) {
+    // If Clerk is not configured, don't render auth links
+    return null;
+  }
+
   return (
     <>
       <SignedIn>

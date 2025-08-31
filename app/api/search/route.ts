@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-const API_BASE_URL = "https://rxprescribers.com"
+const API_BASE_URL = "https://api.rxprescribers.com"
 
 export async function GET(request: NextRequest) {
   try {
