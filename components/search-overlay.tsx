@@ -117,12 +117,14 @@ export function SearchOverlay({ isOpen, onClose, initialQuery = "", initialLocat
       setLoadingMessage("Finalizing results...")
       await new Promise((resolve) => setTimeout(resolve, 600))
 
-      const zipMatch = location.match(/\b\d{5}\b/)
-      const zip = zipMatch ? zipMatch[0] : location
+      // Mock lat/lng for now
+      const lat = 40.7128
+      const lng = -74.006
 
-      const results = await RxPrescribersAPI.searchPrescribers({
-        drug: validMedications[0],
-        zip: zip,
+      const results = await RxPrescribersAPI.searchPrescribersHealf({
+        pharmaName: validMedications,
+        lat,
+        lng,
         radius: searchRadius,
       })
 
@@ -222,10 +224,13 @@ export function SearchOverlay({ isOpen, onClose, initialQuery = "", initialLocat
                 />
               </div>
 
+  const availableRadii =
+  const availableRadii =
               <div className="flex items-center space-x-4">
                 <label className="text-sm font-medium">Search Radius:</label>
+                 .map((radius) => (
                 <div className="flex space-x-2">
-                  {[10, 25, 50, 100].map((radius) => (
+                  {.map((radius) => (
                     <Button
                       key={radius}
                       variant={searchRadius === radius ? "default" : "outline"}

@@ -129,4 +129,23 @@ export class RxPrescribersAPI {
 
     return response.json()
   }
+  static async searchPrescribersHealf(params: {
+    pharmaName: string
+    lat: number
+    lng: number
+    radius: number
+  }): Promise<SearchResponse> {
+    const response = await fetch(`/api/prescriber-search`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(params),
+    })
+    if (!response.ok) {
+      throw new Error("Failed to search prescribers (healf)")
+    }
+
+    return response.json()
+  }
 }
