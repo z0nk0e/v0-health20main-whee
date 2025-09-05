@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Search, MapPin, X, Lightbulb, TrendingUp, Clock, Plus, Minus } from "@/lib/simple-icons"
+import { Search, MapPin, X, Lightbulb, TrendingUp, Clock, Plus, Minus } from "lucide-react"
 import { RxPrescribersAPI, type SearchResponse } from "@/lib/api"
 import { SearchResults } from "@/components/search-results"
 
@@ -68,6 +68,8 @@ export function SearchOverlay({ isOpen, onClose, initialQuery = "", initialLocat
     { icon: Clock, text: "Adjust search radius to find providers in different geographic areas" },
   ]
 
+  const availableRadii = [10, 25, 50, 100];
+
   const addMedication = () => {
     if (medications.length < 5) {
       setMedications([...medications, ""])
@@ -122,7 +124,7 @@ export function SearchOverlay({ isOpen, onClose, initialQuery = "", initialLocat
       const lng = -74.006
 
       const results = await RxPrescribersAPI.searchPrescribersHealf({
-        pharmaName: validMedications,
+        pharmaName: validMedications.join(','),
         lat,
         lng,
         radius: searchRadius,
@@ -147,9 +149,7 @@ export function SearchOverlay({ isOpen, onClose, initialQuery = "", initialLocat
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div
-        className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-500 ${
-          isOpen ? "opacity-100" : "opacity-0"
-        }`}
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-500"
         onClick={onClose}
       />
 
@@ -192,18 +192,18 @@ export function SearchOverlay({ isOpen, onClose, initialQuery = "", initialLocat
               {medications.map((medication, index) => (
                 <div key={index} className="relative group flex items-center space-x-2">
                   <div className="flex-1 relative">
-                    <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-accent" />
+                    <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
                     <Input
-                      ref={index === 0 ? searchInputRef : undefined}
+                      ref={index === 0 ? searchInputRef : null}
                       placeholder={`Enter medication ${index + 1} (e.g., Alprazolam, Metformin, Aspirin)`}
                       value={medication}
-                      onChange={(e) => updateMedication(index, e.target.value)}
-                      className="pl-12 h-14 text-lg transition-all duration-300 focus:ring-2 focus:ring-accent/20 hover:border-accent/50 border-2"
-                      onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateMedication(index, e.target.value)}
+                      className="pl-12 h-14 text-lg transition-all duration-300 focus:ring-2 focus:ring-primary/20 hover:border-primary/50 border-2"
+                      onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === "Enter" && handleSearch()}
                     />
                   </div>
                   {medications.length > 1 && (
-                    <Button variant="outline" size="sm" onClick={() => removeMedication(index)} className="p-2">
+                    <Button variant="outline" size="sm" onClick={() => removeMedication(index)}>
                       <Minus className="w-4 h-4" />
                     </Button>
                   )}
@@ -214,23 +214,20 @@ export function SearchOverlay({ isOpen, onClose, initialQuery = "", initialLocat
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Location & Search Area</h3>
               <div className="relative group">
-                <MapPin className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-accent" />
+                <MapPin className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
                 <Input
                   placeholder="Enter your location (city, state, or ZIP code)"
                   value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  className="pl-12 h-14 text-lg transition-all duration-300 focus:ring-2 focus:ring-accent/20 hover:border-accent/50 border-2"
-                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocation(e.target.value)}
+                  className="pl-12 h-14 text-lg transition-all duration-300 focus:ring-2 focus:ring-primary/20 hover:border-primary/50 border-2"
+                  onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === "Enter" && handleSearch()}
                 />
               </div>
 
-  const availableRadii =
-  const availableRadii =
               <div className="flex items-center space-x-4">
                 <label className="text-sm font-medium">Search Radius:</label>
-                 .map((radius) => (
                 <div className="flex space-x-2">
-                  {.map((radius) => (
+                  {availableRadii.map((radius: number) => (
                     <Button
                       key={radius}
                       variant={searchRadius === radius ? "default" : "outline"}
@@ -276,7 +273,7 @@ export function SearchOverlay({ isOpen, onClose, initialQuery = "", initialLocat
                     <Badge
                       key={med}
                       variant="secondary"
-                      className="cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors"
+                      className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
                       onClick={() => {
                         const emptyIndex = medications.findIndex((m) => !m.trim())
                         if (emptyIndex !== -1) {
@@ -296,7 +293,7 @@ export function SearchOverlay({ isOpen, onClose, initialQuery = "", initialLocat
                 <h3 className="text-sm font-medium text-muted-foreground mb-3">Search Tips</h3>
                 {searchTips.map(({ icon: Icon, text }, index) => (
                   <div key={index} className="flex items-start space-x-3 text-sm text-muted-foreground">
-                    <Icon className="w-4 h-4 mt-0.5 text-accent flex-shrink-0" />
+                    <Icon className="w-4 h-4 mt-0.5 text-primary flex-shrink-0" />
                     <span>{text}</span>
                   </div>
                 ))}
