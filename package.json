@@ -51,6 +51,7 @@
     "lucide-react": "^0.454.0",
     "mysql2": "^3.14.4",
     "next": "15.2.4",
+    "next-auth": "5.0.0-beta.29",
     "next-themes": "latest",
     "react": "^19",
     "react-day-picker": "9.8.0",
@@ -63,8 +64,7 @@
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^1.1.2",
     "vercel": "^46.1.1",
-    "zod": "^3.25.67",
-    "next-auth": "5.0.0-beta.29"
+    "zod": "^3.25.67"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.9",
