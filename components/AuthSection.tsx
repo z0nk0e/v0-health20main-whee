@@ -3,85 +3,32 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
-// Check if Clerk is configured
-const clerkAvailable = !!(
-  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY &&
-  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY !== "pk_test_placeholder"
-);
+import { useSession, signIn, signOut } from "next-auth/react";
 
-function FallbackAuth() {
-  const [showAuthFallback, setShowAuthFallback] = useState(false);
-  
-  const handleAuthClick = () => {
-    setShowAuthFallback(true);
-    setTimeout(() => setShowAuthFallback(false), 3000);
-  };
+export function AuthSection() {
+  const { data: session } = useSession();
+
+  if (session) {
+    return (
+      <div className="flex items-center space-x-3">
+        <span className="hidden sm:inline text-sm text-muted-foreground">
+          Welcome, {session.user?.name || session.user?.email}
+        </span>
+        <Button variant="ghost" size="sm" onClick={() => signOut()}>
+          Sign Out
+        </Button>
+      </div>
+    );
+  }
 
   return (
-    <div className="relative flex items-center space-x-3">
-      <Button variant="ghost" size="sm" onClick={handleAuthClick}>
+    <div className="flex items-center space-x-3">
+      <Button variant="ghost" size="sm" onClick={() => signIn()}>
         Sign In
       </Button>
-      <Button size="sm" onClick={handleAuthClick}>
+      <Button size="sm" onClick={() => signIn()}>
         Get Started
       </Button>
-      {showAuthFallback && (
-        <div className="absolute top-12 right-0 bg-background border rounded-lg p-3 shadow-lg z-50">
-          <p className="text-sm text-muted-foreground">
-            Authentication is not configured.
-          </p>
-        </div>
-      )}
     </div>
-  );
-}
-
-// This is the main component you will import into your Header
-export function AuthSection() {
-  // For now, always return the fallback since Clerk is disabled
-  // When you're ready to enable Clerk, uncomment the ClerkProvider in your layout
-  // and change this to: return clerkAvailable ? <ClerkAuth /> : <FallbackAuth />;
-  return <FallbackAuth />;
-}
-
-function ClerkAuth() {
-  const {
-    SignInButton,
-    SignUpButton,
-    UserButton,
-    useUser,
-    SignedIn,
-    SignedOut,
-  } = require("@clerk/nextjs");
-
-  const { user } = useUser();
-  
-  return (
-    <>
-      <SignedIn>
-        <div className="flex items-center space-x-3">
-          <span className="hidden sm:inline text-sm text-muted-foreground">
-            Welcome, {user?.firstName}
-          </span>
-          <UserButton
-            appearance={{
-              elements: { avatarBox: "w-8 h-8" },
-            }}
-          />
-        </div>
-      </SignedIn>
-      <SignedOut>
-        <div className="flex items-center space-x-3">
-          <SignInButton mode="modal">
-            <Button variant="ghost" size="sm">
-              Sign In
-            </Button>
-          </SignInButton>
-          <SignUpButton mode="modal">
-            <Button size="sm">Get Started</Button>
-          </SignUpButton>
-        </div>
-      </SignedOut>
-    </>
   );
 }

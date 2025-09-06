@@ -1,19 +1,23 @@
 import { redirect } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { type VariantProps } from "class-variance-authority";
+import { buttonVariants } from "@/components/ui/button";
+import { badgeVariants } from "@/components/ui/badge";
+import type * as React from "react";
+
+type ButtonProps = React.ComponentProps<typeof Button> & VariantProps<typeof buttonVariants>;
+type BadgeProps = React.ComponentProps<typeof Badge> & VariantProps<typeof badgeVariants>;
 import { Search, MapPin, Clock, Star } from "lucide-react"
 
 export default async function DashboardPage() {
-  // Only use Clerk auth if environment variables are available
-  if (process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY) {
-    const { auth } = await import("@clerk/nextjs/server")
-    const { userId } = auth()
+  const { auth } = await import("../../healf-main/lib/auth");
+  const session = await auth();
 
-    if (!userId) {
-      redirect("/sign-in")
-    }
+  if (!session?.user) {
+    redirect("/auth/signin");
   }
 
   return (
