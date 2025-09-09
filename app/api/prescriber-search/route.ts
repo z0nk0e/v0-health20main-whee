@@ -4,23 +4,30 @@ export async function POST(request: Request) {
   try {
     // 1. Parse the request body from the client
     const body = await request.json();
-    const { drug, zip } = body;
+    // The frontend sends `pharmaName`, `zip`, `radius`, etc.
+    const { pharmaName, zip, radius } = body;
 
     // 2. Validate the input to ensure we have something to search for
-    if (!drug && !zip) {
+    // The external API expects 'drug' or 'zip'
+    if (!pharmaName && !zip) {
       return NextResponse.json(
-        { error: 'At least one search parameter (drug or zip) is required.' },
+        { error: 'At least one search parameter (drug name or zip) is required.' },
         { status: 400 }
       );
     }
 
     // 3. Construct the external API URL safely
     const externalApiUrl = new URL('https://api.rxprescribers.com/api.php');
-    if (drug) {
-      externalApiUrl.searchParams.append('drug', String(drug));
+    // Map `pharmaName` to `drug` for the external API
+    if (pharmaName) {
+      externalApiUrl.searchParams.append('drug', String(pharmaName));
     }
     if (zip) {
       externalApiUrl.searchParams.append('zip', String(zip));
+    }
+    // Pass radius through if it exists
+    if (radius) {
+      externalApiUrl.searchParams.append('radius', String(radius));
     }
 
     // 4. Make the GET request to the external API
