@@ -44,6 +44,7 @@ export async function POST(request: Request) {
   } catch (error) {
     // 7. Catch any other errors (e.g., malformed JSON from client, network issues)
     console.error('An unexpected error occurred in /api/search:', error);
+    console.error('An unexpected error occurred in /api/prescriber-search:', error);
 
     // Specifically check for JSON parsing errors from the initial request
     if (error instanceof SyntaxError) {
