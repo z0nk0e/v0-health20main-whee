@@ -1,50 +1,58 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { searchPrescribers } from "@/lib/db/queries"
-import { z } from "zod"
+import { NextResponse } from 'next/server';
 
-const searchSchema = z.object({
-  pharmaName: z.string().min(1, "Pharmaceutical name is required"),
-  lat: z.number().min(-90).max(90),
-  lng: z.number().min(-180).max(180),
-  radius: z.number().min(1).max(100).default(25),
-  filters: z
-    .object({
-      specialty: z.array(z.string()).optional(),
-      verified: z.boolean().optional(),
-    })
-    .optional(),
-})
-
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
-    const body = await request.json()
-    const validatedData = searchSchema.parse(body)
+    // 1. Parse the request body from the client
+    const body = await request.json();
+    const { drug, zip } = body;
 
-    console.log("[v0] Search request received:", {
-      pharmaName: validatedData.pharmaName,
-      location: `${validatedData.lat}, ${validatedData.lng}`,
-      radius: validatedData.radius,
-    })
-
-    const results = await searchPrescribers(validatedData)
-
-    console.log("[v0] Search completed:", {
-      resultCount: results.length,
-      topMatch: results?.matchScore || 0,
-    })
-
-    return NextResponse.json({
-      results,
-      totalCount: results.length,
-      searchId: crypto.randomUUID(),
-    })
-  } catch (error) {
-    console.error("[v0] Search API error:", error)
-
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: "Invalid request data", details: error.errors }, { status: 400 })
+    // 2. Validate the input to ensure we have something to search for
+    if (!drug && !zip) {
+      return NextResponse.json(
+        { error: 'At least one search parameter (drug or zip) is required.' },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    // 3. Construct the external API URL safely
+    const externalApiUrl = new URL('https://api.rxprescribers.com/api.php');
+    if (drug) {
+      externalApiUrl.searchParams.append('drug', String(drug));
+    }
+    if (zip) {
+      externalApiUrl.searchParams.append('zip', String(zip));
+    }
+
+    // 4. Make the GET request to the external API
+    const apiResponse = await fetch(externalApiUrl.toString());
+
+    // 5. Check if the external API call was successful
+    if (!apiResponse.ok) {
+      // If not, log the error and forward a descriptive error to the client
+      const errorText = await apiResponse.text();
+      console.error(`External API Error: ${apiResponse.status} ${apiResponse.statusText}`, errorText);
+      return NextResponse.json(
+        { error: 'Failed to fetch data from the external provider.' },
+        { status: apiResponse.status }
+      );
+    }
+
+    // 6. Parse the JSON response from the external API and send it back to our client
+    const data = await apiResponse.json();
+    return NextResponse.json(data);
+
+  } catch (error) {
+    // 7. Catch any other errors (e.g., malformed JSON from client, network issues)
+    console.error('An unexpected error occurred in /api/prescriber-search:', error);
+
+    // Specifically check for JSON parsing errors from the initial request
+    if (error instanceof SyntaxError) {
+      return NextResponse.json({ error: 'Invalid JSON in request body.' }, { status: 400 });
+    }
+
+    return NextResponse.json(
+      { error: 'An internal server error occurred.' },
+      { status: 500 }
+    );
   }
 }
