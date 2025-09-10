@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Playfair_Display, Source_Sans_3, Kalam, Dancing_Script } from "next/font/google"
 import { SessionProvider } from "next-auth/react"
+import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
 const playfair = Playfair_Display({
@@ -61,6 +62,7 @@ export default function RootLayout({
         >
           <body className="font-sans">
             <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">{children}</div>
+            <Analytics />
           </body>
         </html>
       </PayPalWrapper>

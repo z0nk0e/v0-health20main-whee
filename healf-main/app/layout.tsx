@@ -6,9 +6,8 @@ import { Analytics } from "@vercel/analytics/next"
 import { Providers } from "@/components/providers"
 import { Suspense } from "react"
 import "./globals.css"
-
 export const metadata: Metadata = {
-  title: "PharmaConnect - Find Prescribers with Sonar Pulse Technology",
+  title: "RX Prescribers - FInd Local Prescribers Authorized To Prescribe Your Specific Medications",
   description: "Revolutionary pharmaceutical prescriber discovery platform with sonar pulse interface",
   generator: "v0.app",
 }

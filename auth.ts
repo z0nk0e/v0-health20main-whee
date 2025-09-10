@@ -1,10 +1,15 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
+import Google from "next-auth/providers/google"
 import type { AuthConfig } from "@auth/core/types"
 import { createClient } from "@supabase/supabase-js"
 
 const config: AuthConfig = {
   providers: [
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+    }),
     Credentials({
       name: "credentials",
       credentials: {
@@ -43,8 +48,8 @@ const config: AuthConfig = {
   callbacks: {
     jwt({ token, user }) {
       if (user) {
-        ;(token as any).id = (user as any).id
-        ;(token as any).role = (user as any).role
+        ;(token as any).id = (user as any).id || (token as any).sub
+        ;(token as any).role = (user as any).role || (token as any).role || "PATIENT"
       }
       return token
     },
