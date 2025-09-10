@@ -131,8 +131,7 @@ export class RxPrescribersAPI {
   }
   static async searchPrescribersHealf(params: {
     pharmaName: string
-    lat: number
-    lng: number
+    zip: string
     radius: number
   }): Promise<SearchResponse> {
     const response = await fetch(`/api/prescriber-search`, {
@@ -143,7 +142,8 @@ export class RxPrescribersAPI {
       body: JSON.stringify(params),
     })
     if (!response.ok) {
-      throw new Error("Failed to search prescribers (healf)")
+      const errorData = await response.json().catch(() => ({ error: "Search failed with status " + response.status }));
+      throw new Error(errorData.error || "Failed to search prescribers");
     }
 
     return response.json()

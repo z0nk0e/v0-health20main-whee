@@ -119,14 +119,10 @@ export function SearchOverlay({ isOpen, onClose, initialQuery = "", initialLocat
       setLoadingMessage("Finalizing results...")
       await new Promise((resolve) => setTimeout(resolve, 600))
 
-      // Mock lat/lng for now
-      const lat = 40.7128
-      const lng = -74.006
-
+      // The API proxy expects a ZIP code, which is in the `location` state.
       const results = await RxPrescribersAPI.searchPrescribersHealf({
         pharmaName: validMedications.join(','),
-        lat,
-        lng,
+        zip: location,
         radius: searchRadius,
       })
 

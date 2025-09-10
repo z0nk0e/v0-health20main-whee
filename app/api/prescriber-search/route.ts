@@ -4,14 +4,17 @@ export async function POST(request: Request) {
   try {
     // 1. Parse the request body from the client
     const body = await request.json();
+    // Log the exact body received from the client for definitive debugging
+    console.log("--- Prescriber Search API Received Body ---", JSON.stringify(body, null, 2));
+
     // The frontend sends `pharmaName`, `zip`, `radius`, etc.
     const { pharmaName, zip, radius } = body;
 
     // 2. Validate the input to ensure we have something to search for
-    // The external API expects 'drug' or 'zip'
-    if (!pharmaName && !zip) {
+    // The external API requires a ZIP code for all searches.
+    if (!zip) {
       return NextResponse.json(
-        { error: 'At least one search parameter (drug name or zip) is required.' },
+        { error: 'A ZIP code is required for the search. The request from the browser did not include one.' },
         { status: 400 }
       );
     }
