@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { toast } from "sonner"
 import { SearchInterface } from "@/components/search-interface"
 import { SonarMap } from "@/components/sonar-map"
 import { PrescriberResults } from "@/components/prescriber-results"
@@ -8,11 +10,15 @@ import { MolecularBackground } from "@/components/molecular-background"
 import type { PrescriberResult } from "@/lib/db/queries"
 
 export default function HomePage() {
+  const router = useRouter()
+  const params = useSearchParams()
   const [searchResults, setSearchResults] = useState<PrescriberResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [selectedPrescriber, setSelectedPrescriber] = useState<string | null>(null)
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
+  const [radius, setRadius] = useState<number>(25)
+  const [searchCount, setSearchCount] = useState<number>(0)
 
   // Get user location on mount
   useEffect(() => {
@@ -36,11 +42,33 @@ export default function HomePage() {
     }
   }, [])
 
-  const handleSearch = async (pharmaName: string, radius = 25) => {
+  // Read URL params and hydrate state; trigger search if possible
+  useEffect(() => {
+    const q = params.get("q")
+    const r = Number(params.get("r") || radius)
+    if (q) {
+      setSearchQuery(q)
+      setRadius(isNaN(r) ? 25 : r)
+      if (userLocation && !isSearching) {
+        // Debounce slighty to avoid race with UI hydration
+        const t = setTimeout(() => handleSearch(q, isNaN(r) ? 25 : r), 100)
+        return () => clearTimeout(t)
+      }
+    }
+  }, [params, userLocation])
+
+  const handleSearch = async (pharmaName: string, radiusMiles = 25) => {
     if (!userLocation || !pharmaName.trim()) return
+
+    // Push URL state for back/forward navigation
+    const url = new URL(window.location.href)
+    url.searchParams.set("q", pharmaName)
+    url.searchParams.set("r", String(radiusMiles))
+    router.push(url.pathname + "?" + url.searchParams.toString(), { scroll: true })
 
     setIsSearching(true)
     setSearchQuery(pharmaName)
+    setRadius(radiusMiles)
 
     try {
       const response = await fetch("/api/search", {
@@ -50,7 +78,7 @@ export default function HomePage() {
           pharmaName,
           lat: userLocation.lat,
           lng: userLocation.lng,
-          radius,
+          radius: radiusMiles,
         }),
       })
 
@@ -58,6 +86,18 @@ export default function HomePage() {
 
       const data = await response.json()
       setSearchResults(data.results || [])
+
+      // Variable reward schedule: local streak toasts
+      try {
+        const nextCount = (Number(localStorage.getItem("rx_search_count") || 0) || 0) + 1
+        localStorage.setItem("rx_search_count", String(nextCount))
+        setSearchCount(nextCount)
+        if ([3, 7, 15].includes(nextCount)) {
+          toast.success(`Achievement unlocked: Explorer ${nextCount === 3 ? "I" : nextCount === 7 ? "II" : "III"}`, {
+            description: `Great exploration! You’ve completed ${nextCount} searches.`,
+          })
+        }
+      } catch {}
     } catch (error) {
       console.error("[v0] Search error:", error)
       setSearchResults([])
@@ -73,6 +113,8 @@ export default function HomePage() {
       <div className="relative z-10 flex flex-col h-screen">
         {/* Header with search */}
         <header className="p-6 border-b border-border/20 backdrop-blur-sm bg-background/80">
+          {/* Thin progress bar for search activity */}
+          {isSearching && <div className="h-0.5 w-full bg-gradient-to-r from-accent/40 via-accent to-accent/40 animate-pulse" />}
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -83,7 +125,13 @@ export default function HomePage() {
               </div>
             </div>
 
-            <SearchInterface onSearch={handleSearch} isSearching={isSearching} userLocation={userLocation} />
+            <SearchInterface
+              onSearch={handleSearch}
+              isSearching={isSearching}
+              userLocation={userLocation}
+              defaultQuery={searchQuery}
+              onQueryChange={setSearchQuery}
+            />
           </div>
         </header>
 

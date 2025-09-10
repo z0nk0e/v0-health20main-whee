@@ -62,8 +62,20 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-background p-4">
+      {/* Escape routes: Home + Back */}
+      <header className="max-w-md mx-auto mb-4 flex items-center justify-between">
+        <Link href="/" className="text-sm text-accent hover:underline">Home</Link>
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          aria-label="Go back"
+        >
+          Back
+        </button>
+      </header>
+      <div className="w-full max-w-md mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-foreground text-balance">Welcome Back</h1>
           <p className="text-muted-foreground text-pretty">Sign in to your PharmaConnect account</p>

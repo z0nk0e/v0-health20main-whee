@@ -67,27 +67,42 @@ export default function SignUpPage() {
   }
 
   if (success) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="w-full max-w-md bg-card/50 backdrop-blur-sm border-border/50">
-          <CardContent className="pt-6 text-center">
-            <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <UserCheck className="w-8 h-8 text-green-500" />
-            </div>
-            <h2 className="text-xl font-semibold text-foreground mb-2">Registration Successful!</h2>
-            <p className="text-muted-foreground">Redirecting you to sign in...</p>
-          </CardContent>
+  return (
+  <div className="min-h-screen bg-background p-4">
+  <header className="max-w-md mx-auto mb-4 flex items-center justify-between">
+  <Link href="/" className="text-sm text-accent hover:underline">Home</Link>
+  </header>
+  <Card className="w-full max-w-md mx-auto bg-card/50 backdrop-blur-sm border-border/50">
+  <CardContent className="pt-6 text-center">
+  <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+    <UserCheck className="w-8 h-8 text-green-500" />
+    </div>
+      <h2 className="text-xl font-semibold text-foreground mb-2">Registration Successful!</h2>
+        <p className="text-muted-foreground">Redirecting you to sign in...</p>
+        </CardContent>
         </Card>
-      </div>
+       </div>
     )
   }
-
+  
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+  <div className="min-h-screen bg-background p-4">
+  <header className="max-w-md mx-auto mb-4 flex items-center justify-between">
+  <Link href="/" className="text-sm text-accent hover:underline">Home</Link>
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          aria-label="Go back"
+        >
+          Back
+        </button>
+      </header>
+      <div className="w-full max-w-md mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-foreground text-balance">Join PharmaConnect</h1>
           <p className="text-muted-foreground text-pretty">Create your account to get started</p>
+          <p className="text-xs text-muted-foreground mt-1">Trusted by 10k+ patients and prescribers</p>
         </div>
 
         <Card className="bg-card/50 backdrop-blur-sm border-border/50">

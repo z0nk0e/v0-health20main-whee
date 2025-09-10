@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ArrowLeft, Save, Upload, User, MapPin, Phone, Globe, Star } from "lucide-react"
 import Link from "next/link"
+import { Breadcrumbs } from "@/components/breadcrumbs"
 
 interface ProfileData {
   firstName: string
@@ -167,6 +168,9 @@ export default function PrescriberProfile() {
       {/* Header */}
       <header className="border-b border-border/20 bg-card/50 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto px-6 py-4">
+          <div className="mb-2">
+            <Breadcrumbs />
+          </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link href="/prescriber/dashboard">

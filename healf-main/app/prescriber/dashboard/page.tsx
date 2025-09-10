@@ -34,6 +34,7 @@ import {
   Plus,
 } from "lucide-react"
 import Link from "next/link"
+import { Breadcrumbs } from "@/components/breadcrumbs"
 
 interface PrescriberProfile {
   id: string
@@ -126,6 +127,12 @@ export default function PrescriberDashboard() {
       {/* Header */}
       <header className="border-b border-border/20 bg-card/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="mb-2">
+            {/* Breadcrumbs */}
+            <div className="pb-2">
+              <Breadcrumbs />
+            </div>
+          </div>
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-foreground">Prescriber Dashboard</h1>

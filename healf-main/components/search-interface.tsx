@@ -11,6 +11,8 @@ interface SearchInterfaceProps {
   onSearch: (pharmaName: string, radius?: number) => void
   isSearching: boolean
   userLocation: { lat: number; lng: number } | null
+  defaultQuery?: string
+  onQueryChange?: (value: string) => void
 }
 
 interface DrugSuggestion {
@@ -19,11 +21,19 @@ interface DrugSuggestion {
   category: string | null
 }
 
-export function SearchInterface({ onSearch, isSearching, userLocation }: SearchInterfaceProps) {
+export function SearchInterface({ onSearch, isSearching, userLocation, defaultQuery, onQueryChange }: SearchInterfaceProps) {
   const [query, setQuery] = useState("")
   const [suggestions, setSuggestions] = useState<DrugSuggestion[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [radius, setRadius] = useState(25)
+
+  // Sync defaultQuery from URL
+  useEffect(() => {
+    if (defaultQuery && defaultQuery !== query) {
+      setQuery(defaultQuery)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultQuery])
 
   // Fetch autocomplete suggestions
   useEffect(() => {
@@ -75,33 +85,45 @@ export function SearchInterface({ onSearch, isSearching, userLocation }: SearchI
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
-              id="pharma-search"
-              type="text"
-              placeholder="Search for Ozempic, Wegovy, Metformin..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="pl-10 bg-input/50 backdrop-blur-sm border-border/50 focus:ring-accent focus:border-accent"
+            id="pharma-search"
+            type="text"
+            placeholder="Search for Ozempic, Wegovy, Metformin..."
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value)
+              onQueryChange?.(e.target.value)
+              }}
+                aria-autocomplete="list"
+                aria-controls="drug-suggestions"
+                aria-expanded={showSuggestions}
+                className="pl-10 bg-input/50 backdrop-blur-sm border-border/50 focus:ring-accent focus:border-accent"
               disabled={isSearching}
             />
-          </div>
-
-          {/* Autocomplete suggestions */}
-          {showSuggestions && suggestions.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
-              {suggestions.map((suggestion) => (
-                <button
-                  key={suggestion.id}
-                  type="button"
-                  onClick={() => handleSuggestionClick(suggestion)}
-                  className="w-full px-4 py-3 text-left hover:bg-accent/10 focus:bg-accent/10 focus:outline-none border-b border-border/20 last:border-b-0"
-                >
-                  <div className="font-medium text-foreground">{suggestion.name}</div>
-                  {suggestion.category && <div className="text-sm text-muted-foreground">{suggestion.category}</div>}
-                </button>
-              ))}
             </div>
-          )}
-        </div>
+
+            {/* Autocomplete suggestions */}
+            {showSuggestions && suggestions.length > 0 && (
+            <div
+            id="drug-suggestions"
+            role="listbox"
+            className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-md shadow-lg z-50 max-h-60 overflow-y-auto transition-all duration-150 ease-out origin-top animate-in fade-in-0 zoom-in-95"
+            >
+            {suggestions.map((suggestion) => (
+                <button
+                    key={suggestion.id}
+                      type="button"
+                    role="option"
+                    aria-selected={false}
+                    onClick={() => handleSuggestionClick(suggestion)}
+                    className="w-full px-4 py-3 text-left hover:bg-accent/10 focus:bg-accent/10 focus:outline-none border-b border-border/20 last:border-b-0 transition-colors"
+                  >
+                    <div className="font-medium text-foreground">{suggestion.name}</div>
+                    {suggestion.category && <div className="text-sm text-muted-foreground">{suggestion.category}</div>}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
         {/* Radius selector */}
         <div>

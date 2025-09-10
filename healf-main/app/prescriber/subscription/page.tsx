@@ -8,8 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Check, Star, Crown, Zap, ArrowLeft, CreditCard } from "lucide-react"
+import { Check, Star, Crown, Zap, ArrowLeft, CreditCard, ShieldCheck, Lock } from "lucide-react"
 import Link from "next/link"
+import { Breadcrumbs } from "@/components/breadcrumbs"
 
 interface SubscriptionTier {
   id: string
@@ -119,9 +120,18 @@ export default function SubscriptionPage() {
       } else {
         const errorData = await response.json()
         console.error("[v0] Subscription error:", errorData.error)
+        if (typeof window !== "undefined") {
+          // Lazy import to avoid SSR issues
+          const { toast } = await import("sonner")
+          toast.error("Checkout failed", { description: errorData.error || "Please try again." })
+        }
       }
     } catch (error) {
       console.error("[v0] Subscription error:", error)
+      if (typeof window !== "undefined") {
+        const { toast } = await import("sonner")
+        toast.error("Network error", { description: "Could not reach payment server. Check connection and retry." })
+      }
     } finally {
       setProcessingTier(null)
     }
@@ -154,6 +164,9 @@ export default function SubscriptionPage() {
       {/* Header */}
       <header className="border-b border-border/20 bg-card/50 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto px-6 py-4">
+          <div className="mb-2">
+            <Breadcrumbs />
+          </div>
           <div className="flex items-center gap-4">
             <Link href="/prescriber/dashboard">
               <Button variant="ghost" size="sm">
@@ -164,6 +177,11 @@ export default function SubscriptionPage() {
             <div>
               <h1 className="text-2xl font-bold text-foreground">Subscription Plans</h1>
               <p className="text-muted-foreground">Choose the plan that works best for your practice</p>
+              <div className="flex flex-wrap items-center gap-4 mt-2 text-xs text-muted-foreground">
+                <span className="inline-flex items-center gap-1"><ShieldCheck className="w-3.5 h-3.5" /> No hidden fees</span>
+                <span className="inline-flex items-center gap-1"><Lock className="w-3.5 h-3.5" /> Secure PayPal checkout</span>
+                <span className="inline-flex items-center gap-1"><Zap className="w-3.5 h-3.5" /> Cancel anytime</span>
+              </div>
             </div>
           </div>
         </div>
@@ -223,6 +241,9 @@ export default function SubscriptionPage() {
                     {tier.id === "verified" && "Great for established practices"}
                     {tier.id === "featured" && "Maximum visibility and features"}
                   </CardDescription>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Billed monthly. Cancel anytime. No hidden fees.
+                  </p>
                 </CardHeader>
 
                 <CardContent className="space-y-4">
@@ -263,12 +284,16 @@ export default function SubscriptionPage() {
                         {processingTier === tier.id ? (
                           <>
                             <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
-                            Processing...
+                            Redirecting to PayPal...
                           </>
                         ) : (
                           <>
                             <CreditCard className="w-4 h-4 mr-2" />
-                            {tier.id === "free" ? "Downgrade" : isUpgrade ? "Upgrade" : "Switch Plan"}
+                            {tier.id === "free"
+                              ? "Downgrade"
+                              : isUpgrade
+                              ? "Checkout with PayPal"
+                              : "Switch Plan"}
                           </>
                         )}
                       </Button>
