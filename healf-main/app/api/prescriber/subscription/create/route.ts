@@ -9,6 +9,8 @@ const createSubscriptionSchema = z.object({
 // PayPal API configuration
 const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID
 const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET
+const PAYPAL_PLAN_VERIFIED_ID = process.env.PAYPAL_PLAN_VERIFIED_ID
+const PAYPAL_PLAN_FEATURED_ID = process.env.PAYPAL_PLAN_FEATURED_ID
 const PAYPAL_BASE_URL =
   process.env.NODE_ENV === "production" ? "https://api.paypal.com" : "https://api.sandbox.paypal.com"
 
@@ -36,27 +38,42 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    if (!PAYPAL_CLIENT_ID || !PAYPAL_CLIENT_SECRET) {
+      return NextResponse.json({ error: "PayPal credentials not configured" }, { status: 500 })
+    }
+
     const body = await request.json()
     const { tierId } = createSubscriptionSchema.parse(body)
 
     // Get PayPal access token
     const accessToken = await getPayPalAccessToken()
 
-    // Define subscription plans
+    // Define subscription plans (prefer env-configured plan IDs)
     const plans = {
       verified: {
-        planId: "P-VERIFIED-PLAN-ID", // This would be created in PayPal dashboard
+        planId: PAYPAL_PLAN_VERIFIED_ID || "P-VERIFIED-PLAN-ID",
         amount: "19.00",
         name: "PharmaConnect Verified",
       },
       featured: {
-        planId: "P-FEATURED-PLAN-ID", // This would be created in PayPal dashboard
+        planId: PAYPAL_PLAN_FEATURED_ID || "P-FEATURED-PLAN-ID",
         amount: "49.00",
         name: "PharmaConnect Featured",
       },
     }
 
     const selectedPlan = plans[tierId]
+
+    // Guard: if placeholder plan IDs are still present, instruct configuration
+    if (
+      (tierId === "verified" && selectedPlan.planId === "P-VERIFIED-PLAN-ID") ||
+      (tierId === "featured" && selectedPlan.planId === "P-FEATURED-PLAN-ID")
+    ) {
+      return NextResponse.json(
+        { error: `PayPal ${tierId} plan ID not configured. Set PAYPAL_PLAN_${tierId.toUpperCase()}_ID in environment.` },
+        { status: 500 },
+      )
+    }
 
     // Create PayPal subscription
     const subscriptionData = {

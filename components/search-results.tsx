@@ -59,6 +59,8 @@ const PRICING_TIERS = {
   },
 }
 
+import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js"
+
 const PayPalButtonsComponent = ({
   onSuccess,
   onError,
@@ -72,86 +74,69 @@ const PayPalButtonsComponent = ({
 }) => {
   const [isProcessing, setIsProcessing] = useState(false)
   const tier = PRICING_TIERS[selectedTier]
+  const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
 
-  const createOrder = useCallback(async () => {
-    setIsProcessing(true)
-    console.log("[v0] Creating PayPal order...")
-
-    try {
-      const response = await fetch("/api/paypal/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items: [{ name: `RX Prescribers ${tier.name}`, price: tier.price, qty: 1 }],
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const data = await response.json()
-      console.log("[v0] PayPal order created:", data.id)
-      return data.id
-    } catch (error) {
-      console.error("[v0] PayPal order creation failed:", error)
-      setIsProcessing(false)
-      throw error
-    }
-  }, [tier])
-
-  const onApprove = useCallback(
-    async (data: any) => {
-      console.log("[v0] PayPal payment approved, capturing...")
-
-      try {
-        const response = await fetch(`/api/paypal/orders/${data.orderID}/capture`, {
-          method: "POST",
-        })
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-
-        const details = await response.json()
-        console.log("[v0] PayPal payment captured:", details)
-
-        setIsProcessing(false)
-        onSuccess()
-      } catch (error) {
-        console.error("[v0] PayPal capture failed:", error)
-        setIsProcessing(false)
-        onError()
-      }
-    },
-    [onSuccess, onError],
-  )
-
-  const handleError = useCallback(
-    (err: any) => {
-      console.error("[v0] PayPal error:", err)
-      setIsProcessing(false)
-      onError()
-    },
-    [onError],
-  )
-
-  const handleCancel = useCallback(() => {
-    console.log("[v0] PayPal payment cancelled")
-    setIsProcessing(false)
-    onCancel()
-  }, [onCancel])
+  // If client ID missing, show helpful message
+  if (!clientId) {
+    return (
+      <div className="text-center p-4 border border-gray-200 rounded-lg bg-gray-50">
+        <p className="text-sm text-gray-600 mb-2">PayPal is not configured. Set NEXT_PUBLIC_PAYPAL_CLIENT_ID.</p>
+        <Button onClick={onCancel} variant="outline" className="bg-transparent">Close</Button>
+      </div>
+    )
+  }
 
   return (
-    <div className="text-center p-4 border border-gray-200 rounded-lg bg-gray-50">
-      <p className="text-sm text-gray-600 mb-2">PayPal payment is currently unavailable</p>
-      <Button
-        onClick={onSuccess}
-        className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-      >
-        Continue with Free Trial
-      </Button>
-    </div>
+    <PayPalScriptProvider options={{ clientId, currency: "USD" }}>
+      <div className="w-full">
+        <PayPalButtons
+          style={{ layout: "vertical", shape: "rect", label: "pay" }}
+          forceReRender={[tier.price]}
+          createOrder={async () => {
+            try {
+              setIsProcessing(true)
+              const response = await fetch("/api/paypal/orders", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  items: [{ name: `RX Prescribers ${tier.name}`, price: tier.price, qty: 1 }],
+                }),
+              })
+              if (!response.ok) throw new Error(`Create order failed: ${response.status}`)
+              const data = await response.json()
+              return data.id
+            } catch (err) {
+              console.error("[v0] createOrder error:", err)
+              setIsProcessing(false)
+              onError()
+              throw err
+            }
+          }}
+          onApprove={async (data) => {
+            try {
+              const res = await fetch(`/api/paypal/orders/${data.orderID}/capture`, { method: "POST" })
+              if (!res.ok) throw new Error(`Capture failed: ${res.status}`)
+              setIsProcessing(false)
+              onSuccess()
+            } catch (err) {
+              console.error("[v0] onApprove capture error:", err)
+              setIsProcessing(false)
+              onError()
+            }
+          }}
+          onCancel={() => {
+            setIsProcessing(false)
+            onCancel()
+          }}
+          onError={(err) => {
+            console.error("[v0] PayPalButtons onError:", err)
+            setIsProcessing(false)
+            onError()
+          }}
+          disabled={isProcessing}
+        />
+      </div>
+    </PayPalScriptProvider>
   )
 }
 
