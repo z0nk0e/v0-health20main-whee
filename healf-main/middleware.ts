@@ -1,8 +1,14 @@
 import { auth } from "@/auth"
 import { NextResponse } from "next/server"
+import { NextRequest } from "next/server"
+import NextAuth from "next-auth"
+import CredentialsProvider from "next-auth/providers/credentials"
+import { getDb } from "@/lib/db/connection"
+import { users } from "@/lib/db/schema"
+import { eq } from "drizzle-orm"
 
-export default auth((req) => {
-  const { pathname } = req.nextUrl
+export default auth((req: NextRequest & { auth: any }) => {
+  const { pathname } = req.nextUrl;
   const isLoggedIn = !!req.auth
   const userRole = req.auth?.user?.role
 
