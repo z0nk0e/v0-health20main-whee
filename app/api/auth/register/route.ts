@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { createClient } from "@supabase/supabase-js"
 
 export async function POST(request: Request) {
   try {
@@ -10,37 +11,37 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: validation.error }, { status: 400 })
     }
 
-    const [{ getDb }, { users }, { eq }, { hashPassword }] = await Promise.all([
-      import("@/lib/db/connection"),
-      import("@/lib/db/schema"),
-      import("drizzle-orm"),
-      import("@/lib/auth/hash"),
-    ])
-
     const { email, password, name, role } = validation.value
 
-    const db = getDb()
+    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-    // Check uniqueness by email
-    const existing = await db
-      .select({ id: users.id })
-      .from(users)
-      .where(eq(users.email, email))
-      .limit(1)
-
-    if (existing.length > 0) {
-      return NextResponse.json({ error: "User with this email already exists" }, { status: 409 })
+    if (!supabaseUrl || !serviceKey) {
+      console.error("[register] Missing Supabase env vars")
+      return NextResponse.json({ error: "Server misconfiguration" }, { status: 500 })
     }
 
-    const passwordHash = await hashPassword(password)
+    const supabase = createClient(supabaseUrl, serviceKey)
 
-    await db.insert(users).values({
+    const { data, error } = await supabase.auth.admin.createUser({
       email,
-      passwordHash,
-      name,
-      role,
-      createdAt: new Date(),
+      password,
+      email_confirm: true,
+      user_metadata: { name, role },
     })
+
+    if (error) {
+      const status = (error as any).status ?? 500
+      if (status === 422 || status === 409) {
+        return NextResponse.json({ error: "E-mail already in use" }, { status: 409 })
+      }
+      console.error("[register] supabase error:", error)
+      return NextResponse.json({ error: "Unable to register" }, { status: 500 })
+    }
+
+    if (!data?.user) {
+      return NextResponse.json({ error: "Registration failed" }, { status: 500 })
+    }
 
     return NextResponse.json({ message: "User registered successfully" }, { status: 201 })
   } catch (err) {
