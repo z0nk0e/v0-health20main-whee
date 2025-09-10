@@ -18,3 +18,9 @@ declare module "next-auth/jwt" {
     role: "PATIENT" | "PRESCRIBER"
   }
 }
+
+declare module "@auth/core/adapters" {
+  interface AdapterUser {
+    role: "PATIENT" | "PRESCRIBER";
+  }
+}

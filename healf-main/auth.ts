@@ -9,6 +9,14 @@ import { JWT } from "next-auth/jwt"
 import { Session, User } from "next-auth"
 import type { AdapterUser } from "@auth/core/adapters"
 import type { Account, Profile } from "@auth/core/types"
+type NextAuthFunction = (config: AuthConfig) => {
+  handlers: any;
+  signIn: any;
+  signOut: any;
+  auth: any;
+};
+
+const NextAuthCallable = NextAuth as unknown as NextAuthFunction;
 
 export const config: AuthConfig = {
   providers: [
@@ -37,14 +45,14 @@ export const config: AuthConfig = {
           return null
         }
 
-        const foundUser = userArray
+        const foundUser = userArray[0]
 
         const isValidPassword = await bcrypt.compare(credentials.password as string, foundUser.passwordHash || "")
 
         if (!isValidPassword) {
           return null
         }
-
+        
         return {
           id: foundUser.id,
           email: foundUser.email,
@@ -55,15 +63,19 @@ export const config: AuthConfig = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user, account, profile, trigger }: { token: JWT; user: User | AdapterUser; account: Account | null; profile?: Profile; trigger?: "signIn" | "signUp" | "update" | undefined; }) {
+    async jwt({ token, user }) {
       if (user) {
-        token.role = user.role
-        token.id = user.id
+        if ('role' in user) {
+          token.role = user.role as "PATIENT" | "PRESCRIBER";
+        }
+        if ('id' in user) {
+          token.id = user.id as string;
+        }
       }
       return token
     },
-    async session({ session, token, user, newSession, trigger }: { session: Session; token: JWT; user: User | AdapterUser; newSession: any; trigger?: "update" | undefined; }) {
-      if (token && session.user) {
+    async session({ session, token, user, newSession, trigger }) {
+      if (token && session.user && token.id && token.role) {
         session.user.id = token.id as string
         session.user.role = token.role as "PATIENT" | "PRESCRIBER"
       }
@@ -79,4 +91,4 @@ export const config: AuthConfig = {
   secret: process.env.AUTH_SECRET,
 }
 
-export const { handlers, signIn, signOut, auth } = NextAuth(config)
+export const { handlers, signIn, signOut, auth } = NextAuthCallable(config)
