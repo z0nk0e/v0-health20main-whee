@@ -1,4 +1,4 @@
-import { type NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 
 // Dynamic import for PayPal SDK
 async function getPayPalClient() {
@@ -12,9 +12,9 @@ async function getPayPalClient() {
   return new paypal.core.PayPalHttpClient(environment)
 }
 
-export async function POST(request: NextRequest, { params }: { params: { orderID: string } }) {
+export async function POST(request: Request, context: { params: Promise<{ orderID: string }> }) {
   try {
-    const { orderID } = params
+    const { orderID } = await context.params
 
     const paypal = await import("@paypal/checkout-server-sdk")
     const captureRequest = new paypal.orders.OrdersCaptureRequest(orderID)

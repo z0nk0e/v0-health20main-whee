@@ -1,5 +1,5 @@
 import { mysqlTable, varchar, decimal, int, boolean, primaryKey, index, timestamp, text } from "drizzle-orm/mysql-core"
-import { crypto } from "crypto"
+import { randomUUID } from "crypto"
 
 // US ZIP codes table for geographic searches
 export const usZipcodes = mysqlTable(
@@ -92,7 +92,7 @@ export const users = mysqlTable(
   {
     id: varchar("id", { length: 36 })
       .primaryKey()
-      .$defaultFn(() => crypto.randomUUID()),
+      .$defaultFn(() => randomUUID()),
     email: varchar("email", { length: 255 }).unique().notNull(),
     passwordHash: varchar("password_hash", { length: 255 }),
     name: varchar("name", { length: 255 }),
@@ -112,7 +112,7 @@ export const prescriberProfiles = mysqlTable(
   {
     id: varchar("id", { length: 36 })
       .primaryKey()
-      .$defaultFn(() => crypto.randomUUID()),
+      .$defaultFn(() => randomUUID()),
     userId: varchar("user_id", { length: 36 }).references(() => users.id),
     npiNumber: varchar("npi_number", { length: 10 }).unique(),
     firstName: varchar("first_name", { length: 100 }).notNull(),

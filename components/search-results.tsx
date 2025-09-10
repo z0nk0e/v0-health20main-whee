@@ -200,8 +200,8 @@ const PricingModal = ({
                       ${tier.price}
                       {tier.price > 0 && <span className="text-sm font-normal">/{tier.period}</span>}
                     </div>
-                    {tier.originalPrice && (
-                      <div className="text-sm text-muted-foreground line-through">${tier.originalPrice}/year</div>
+                    {"originalPrice" in tier && (
+                      <div className="text-sm text-muted-foreground line-through">${(tier as any).originalPrice}/year</div>
                     )}
                   </div>
                 </CardHeader>
@@ -294,8 +294,8 @@ export function SearchResults({ results, isLoading, loadingMessage, onUpgradeToP
               <p className="text-sm text-muted-foreground">
                 {tier.period === "forever" ? "Free forever" : `per ${tier.period}`}
               </p>
-              {tier.originalPrice && (
-                <p className="text-sm text-green-600">Save ${(tier.originalPrice - tier.price).toFixed(2)}!</p>
+              {"originalPrice" in tier && (
+                <p className="text-sm text-green-600">Save ${(((tier as any).originalPrice - tier.price) as number).toFixed(2)}!</p>
               )}
             </div>
 
@@ -409,7 +409,7 @@ export function SearchResults({ results, isLoading, loadingMessage, onUpgradeToP
           <PrescriberCard
             key={prescriber.npi}
             prescriber={prescriber}
-            isPremium={results.is_premium}
+            isPremium={Boolean(results.is_premium)}
             onUpgrade={handleUpgradeClick}
           />
         ))}
@@ -503,10 +503,10 @@ function PrescriberCard({ prescriber, isPremium, onUpgrade }: PrescriberCardProp
           </div>
         </div>
 
-        {prescriber.phone && (
+        {"phone" in prescriber && (prescriber as any).phone && (
           <div className="flex items-center space-x-2">
             <Phone className="w-4 h-4 text-muted-foreground" />
-            <BlurredText className="text-sm">{prescriber.phone}</BlurredText>
+            <BlurredText className="text-sm">{(prescriber as any).phone}</BlurredText>
           </div>
         )}
 

@@ -119,7 +119,7 @@ export function cn(...inputs: ClassValue[]): string {
 
 // Proper VariantProps type
 export type VariantProps<T extends (...args: any[]) => any> = Omit<
-  Parameters<T>[0],
+  NonNullable<Parameters<T>[0]>,
   'class' | 'className'
 >
 
@@ -176,7 +176,8 @@ export function cva<
         const { class: compoundClass, className: compoundClassName, ...compoundProps } = compound
         
         const matches = Object.entries(compoundProps).every(([key, value]) => {
-          const propValue = variantProps?.[key] || config?.defaultVariants?.[key]
+          const vp = (variantProps as Record<string, unknown>) || {}
+          const propValue = vp[key] || (config?.defaultVariants as Record<string, unknown> | undefined)?.[key]
           return propValue === value
         })
         

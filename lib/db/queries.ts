@@ -61,7 +61,7 @@ export async function searchPrescribers(params: SearchRequest): Promise<Prescrib
     return []
   }
 
-  const drugId = drugResult.drugId
+  const drugId = drugResult[0].drugId
 
   // Search prescribers with geo-filtering and distance calculation
   const results = await db
@@ -94,8 +94,8 @@ export async function searchPrescribers(params: SearchRequest): Promise<Prescrib
     .where(
       and(
         // Bounding box filter for performance
-        between(usZipcodes.latitude, bounds.minLat, bounds.maxLat),
-        between(usZipcodes.longitude, bounds.minLng, bounds.maxLng),
+        between(usZipcodes.latitude, String(bounds.minLat), String(bounds.maxLat)),
+        between(usZipcodes.longitude, String(bounds.minLng), String(bounds.maxLng)),
         // Drug filter
         eq(npiPrescriptions.drugId, drugId),
         // Specialty filter if provided

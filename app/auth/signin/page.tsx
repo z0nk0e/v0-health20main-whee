@@ -34,7 +34,7 @@ export default function SignInPage() {
         setError("Invalid email or password")
       } else {
         const session = await getSession()
-        if (session?.user.role === "PRESCRIBER") {
+        if (session?.user && (session.user as any).role === "PRESCRIBER") {
           router.push("/prescriber/dashboard")
         } else {
           router.push("/")
