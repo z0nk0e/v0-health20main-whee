@@ -13,11 +13,11 @@ type BadgeProps = React.ComponentProps<typeof Badge> & VariantProps<typeof badge
 import { Search, MapPin, Clock, Star } from "lucide-react"
 
 export default async function DashboardPage() {
-  const { auth } = await import("../../healf-main/lib/auth");
-  const session = await auth();
+  const { auth } = await import("@/auth")
+  const session = await auth()
 
   if (!session?.user) {
-    redirect("/auth/signin");
+    redirect("/auth/signin")
   }
 
   return (
