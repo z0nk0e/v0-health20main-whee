@@ -35,9 +35,20 @@ export default auth((req: NextRequest & { auth: any }) => {
     return NextResponse.redirect(new URL("/", req.url))
   }
 
+  // If accessing prescriber routes without being a prescriber
+  if (isPrescriberRoute && (!isLoggedIn || userRole !== "PRESCRIBER")) {
+    return NextResponse.redirect(new URL("/auth/signin", req.url))
+  }
+
+  // Protect routes that are not public
+  if (!isPublicRoute && !isLoggedIn) {
+    return NextResponse.redirect(new URL("/auth/signin", req.url))
+  }
+
   return NextResponse.next()
 })
 
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 }
