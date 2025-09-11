@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Search, MapPin, Clock, Shield, Sparkles } from "@/lib/simple-icons"
+import { Search, Clock, Shield, Sparkles } from "@/lib/simple-icons"
 import { SearchOverlay } from "./search-overlay"
 
 export function HeroSection() {
@@ -92,6 +92,12 @@ export function HeroSection() {
                 aria-label="Search for medication or ZIP code"
                 onSubmit={(e) => {
                   e.preventDefault()
+                  const trimmed = searchQuery.trim()
+                  const zipMatch = trimmed.match(/^\d{5}(?:-\d{4})?$/)
+                  if (zipMatch) {
+                    setLocation(trimmed.slice(0, 5))
+                    setSearchQuery("")
+                  }
                   setIsSearchOverlayOpen(true)
                 }}
               >
