@@ -70,17 +70,19 @@ export function HeroSection() {
               Trusted by 825K+ Healthcare Providers
             </Badge>
 
-            <h1 className="font-serif text-5xl font-bold tracking-tight md:text-7xl lg:text-8xl leading-tight">
-              <AnimatedText text="Find Healthcare Providers Who" animationType="slide" delay={200} stagger={30} />
+            <h1 className="font-serif text-3xl font-bold tracking-tight md:text-6xl lg:text-7xl leading-tight md:leading-[1.1]">
+              <AnimatedText text="Find Authorized" animationType="slide" delay={200} stagger={30} />
               <span className="kinetic-text bg-gradient-to-r from-accent via-secondary to-accent bg-clip-text text-transparent animate-gradient-x">
-                <AnimatedText text=" Prescribe" animationType="bounce" delay={800} stagger={80} />
+                <AnimatedText text=" Prescribers" animationType="bounce" delay={800} stagger={80} />
               </span>
-              <br className="hidden md:block" />
-              <AnimatedText text="Your Medications" animationType="fade" delay={1200} stagger={40} />
+              <br className="block" aria-hidden="true" />
+              <AnimatedText text="of Your Specific" animationType="fade" delay={1200} stagger={40} />
+              <br className="block md:hidden" aria-hidden="true" />
+              <AnimatedText text=" Medications" animationType="fade" delay={1400} stagger={40} />
             </h1>
 
             <p
-              className={`mx-auto mt-8 max-w-3xl text-xl text-muted-foreground md:text-2xl leading-relaxed transition-all duration-1000 delay-[1800ms] ${
+              className={`mx-auto mt-6 max-w-3xl text-lg text-muted-foreground md:text-xl leading-relaxed md:leading-normal transition-all duration-1000 delay-[1800ms] ${
                 isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
               }`}
             >
