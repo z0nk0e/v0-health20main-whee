@@ -1,9 +1,14 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import { auth } from '@/auth';
 
 
 export async function POST(request: Request) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Sign in required' }, { status: 401 });
+    }
     // 1. Parse the request body from the client
     const body = await request.json();
     // Log the exact body received from the client for definitive debugging

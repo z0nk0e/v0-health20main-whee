@@ -11,7 +11,14 @@ export default function AccountPage() {
     const load = async () => {
       try {
         const res = await fetch('/api/me/access')
-        if (!res.ok) throw new Error(await res.text())
+        if (res.status === 401) {
+          window.location.href = '/auth/signin'
+          return
+        }
+        if (!res.ok) {
+          const txt = await res.text().catch(()=> 'Failed')
+          throw new Error(txt || 'Failed')
+        }
         const json = await res.json()
         setData(json)
       } catch (e) {
@@ -23,9 +30,6 @@ export default function AccountPage() {
     load()
   }, [])
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>
-  if (error) return <div className="min-h-screen flex items-center justify-center text-red-600">{error}</div>
-
   const [pwState, setPwState] = useState<{cur:string; next:string; confirm:string; saving:boolean; msg:string|null}>({cur:'',next:'',confirm:'',saving:false,msg:null})
   const [cancelState, setCancelState] = useState<{loading:boolean; msg:string|null}>({loading:false,msg:null})
   const [subStatus, setSubStatus] = useState<{status?:string; next?:string} | null>(null)
@@ -34,14 +38,17 @@ export default function AccountPage() {
     const loadStatus = async () => {
       try {
         const res = await fetch('/api/me/subscription/status')
-        if (res.ok) {
-          const j = await res.json()
-          setSubStatus({ status: j.status, next: j.nextBillingTime })
-        }
-      } catch {}
-    }
-    if (data?.plan && data.plan !== 'FREE') loadStatus()
+      if (res.ok) {
+      const j = await res.json()
+    setSubStatus({ status: j.status, next: j.nextBillingTime })
+  }
+  } catch {}
+  }
+  if (data?.plan && data.plan !== 'FREE') loadStatus()
   }, [data?.plan])
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>
+  if (error) return <div className="min-h-screen flex items-center justify-center text-red-600">{error}</div>
 
   async function changePassword(e: React.FormEvent) {
     e.preventDefault()
@@ -61,7 +68,10 @@ export default function AccountPage() {
     try {
       const res = await fetch('/api/me/subscription/cancel', { method:'POST' })
       if (res.ok) { setCancelState({loading:false,msg:'Subscription cancelled'}); window.location.reload() }
-      else setCancelState({loading:false,msg:'Cancellation failed'})
+      else {
+        const txt = await res.text().catch(()=> null)
+        setCancelState({loading:false,msg: txt || 'Cancellation failed'})
+      }
     } catch { setCancelState({loading:false,msg:'Error'}) }
   }
 
@@ -83,7 +93,7 @@ export default function AccountPage() {
             )}
           </div>
           <div className="flex gap-2">
-            <a href="/" className="px-4 py-2 rounded border">Back</a>
+            <a href="#" aria-label="Go back" onClick={(e)=>{e.preventDefault(); history.back()}} className="px-4 py-2 rounded border">Back</a>
             <a href="/upgrade" className="px-4 py-2 rounded bg-accent text-accent-foreground">Upgrade</a>
             {(data?.plan === 'BASIC' || data?.plan === 'PREMIUM' || data?.plan === 'ANNUAL') && (
               <button onClick={cancelSubscription} className="px-4 py-2 rounded border" disabled={cancelState.loading}>

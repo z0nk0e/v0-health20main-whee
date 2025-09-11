@@ -153,10 +153,10 @@ const PricingModal = ({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="pricing-modal-title">
       <Card className="w-full max-w-4xl relative max-h-[90vh] overflow-y-auto">
         <CardHeader>
-          <CardTitle className="text-center text-2xl">Choose Your Plan</CardTitle>
+          <CardTitle id="pricing-modal-title" className="text-center text-2xl">Choose Your Plan</CardTitle>
           <p className="text-center text-muted-foreground">
             Select the plan that best fits your prescriber search needs
           </p>
@@ -216,7 +216,7 @@ const PricingModal = ({
             ))}
           </div>
           <div className="mt-6 text-center">
-            <Button variant="outline" onClick={onClose} className="bg-transparent">
+            <Button aria-label="Close pricing dialog" variant="outline" onClick={onClose} className="bg-transparent">
               Cancel
             </Button>
           </div>
@@ -268,10 +268,10 @@ export function SearchResults({ results, isLoading, loadingMessage, onUpgradeToP
     }
 
     return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="upgrade-modal-title">
         <Card className="w-full max-w-md relative">
           <CardHeader>
-            <CardTitle className="text-center">Upgrade to {tier.name}</CardTitle>
+            <CardTitle id="upgrade-modal-title" className="text-center">Upgrade to {tier.name}</CardTitle>
             <p className="text-center text-muted-foreground">{tier.features.join(", ")}</p>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -296,7 +296,7 @@ export function SearchResults({ results, isLoading, loadingMessage, onUpgradeToP
               </div>
             </div>
 
-            <Button variant="outline" onClick={handleClose} className="w-full bg-transparent">
+            <Button aria-label="Close upgrade dialog" variant="outline" onClick={handleClose} className="w-full bg-transparent">
               Cancel
             </Button>
           </CardContent>
@@ -355,6 +355,7 @@ export function SearchResults({ results, isLoading, loadingMessage, onUpgradeToP
 
         {!results.is_premium && (
           <Button
+            aria-label="Open pricing dialog"
             onClick={handleUpgradeClick}
             className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
           >
@@ -378,6 +379,7 @@ export function SearchResults({ results, isLoading, loadingMessage, onUpgradeToP
                 </div>
               </div>
               <Button
+                aria-label="Open pricing dialog"
                 onClick={handleUpgradeClick}
                 variant="outline"
                 className="border-purple-300 text-purple-700 hover:bg-purple-100 bg-transparent"

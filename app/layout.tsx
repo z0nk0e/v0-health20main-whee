@@ -31,11 +31,47 @@ const dancingScript = Dancing_Script({
   variable: "--font-signature",
 })
 
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
+
 export const metadata: Metadata = {
-  title: "RX Prescribers - Find Healthcare Providers Who Prescribe Specific Medications",
+  metadataBase: new URL(baseUrl),
+  title: {
+    default: "RX Prescribers - Find Healthcare Providers Who Prescribe Specific Medications",
+    template: "%s | RX Prescribers",
+  },
   description:
     "Connect with healthcare providers who prescribe the medications you need. Search our database of 825K+ providers and 4.5M+ prescription records.",
   generator: "v0.app",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    url: baseUrl,
+    siteName: "RX Prescribers",
+    title: "RX Prescribers - Find Healthcare Providers Who Prescribe Specific Medications",
+    description:
+      "Connect with healthcare providers who prescribe the medications you need. Search our database of 825K+ providers and 4.5M+ prescription records.",
+    images: [
+      {
+        url: "/og.png",
+        width: 1200,
+        height: 630,
+        alt: "RX Prescribers",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "RX Prescribers",
+    description:
+      "Find providers who prescribe the medications you need. Search 825K+ providers and 4.5M+ prescription records.",
+    images: ["/og.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 }
 
 export default function RootLayout({
