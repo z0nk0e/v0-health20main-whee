@@ -1,9 +1,23 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { requireAuth } from "@/lib/api/guard"
+import { getOrCreateUserAccess, canConsumeSearch } from "@/lib/db/access"
 
 const API_BASE_URL = "https://api.rxprescribers.com"
 
 export async function GET(request: NextRequest) {
   try {
+    // Require auth
+    const authResult = await requireAuth()
+    if (authResult instanceof NextResponse) return authResult
+    const { userId } = authResult
+
+    // Enforce plan entitlements (non-free + monthly limits if BASIC)
+    const access = await getOrCreateUserAccess(userId)
+    const gate = await canConsumeSearch(userId)
+    if (!gate.allowed) {
+      return NextResponse.json({ error: "Upgrade required", reason: gate.reason }, { status: 402 })
+    }
+
     const { searchParams } = new URL(request.url)
 
     // Forward all query parameters to the external API
@@ -35,7 +49,7 @@ export async function GET(request: NextRequest) {
     let data
     try {
       data = JSON.parse(responseText)
-    } catch (parseError) {
+    } catch (_e) {
       console.error("[v0] Failed to parse enhanced API response as JSON:", responseText)
       return NextResponse.json(
         {
@@ -50,7 +64,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       ...data,
-      is_premium: false, // Enhanced API still returns blurred results unless premium
+      is_premium: access.plan !== "FREE",
     })
   } catch (error) {
     console.error("[v0] API proxy error:", error)

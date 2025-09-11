@@ -98,7 +98,7 @@ export function FeaturesSection() {
   }, [])
 
   return (
-    <section ref={sectionRef} className="py-20 relative overflow-hidden">
+    <section ref={sectionRef} className="py-12 relative overflow-hidden">
       <div className="absolute inset-0">
         <div className="absolute top-20 right-20 w-64 h-64 bg-gradient-to-br from-accent/5 to-primary/5 rounded-full blur-3xl animate-pulse" />
         <div

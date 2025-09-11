@@ -33,7 +33,7 @@ export function HeroSection() {
 
   return (
     <>
-      <section className="relative overflow-hidden bg-gradient-to-br from-background via-background to-accent/5 py-24 md:py-40">
+      <section className="relative overflow-hidden bg-gradient-to-br from-background via-background to-accent/5 py-16 md:py-24">
         <div className="absolute inset-0 overflow-hidden">
           <div
             className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-accent/20 to-secondary/10 rounded-full blur-3xl animate-pulse transform-3d"
@@ -71,11 +71,12 @@ export function HeroSection() {
             </Badge>
 
             <h1 className="font-serif text-5xl font-bold tracking-tight md:text-7xl lg:text-8xl leading-tight">
-              <AnimatedText text="Find Healthcare Providers Who " animationType="slide" delay={200} stagger={30} />
+              <AnimatedText text="Find Healthcare Providers Who" animationType="slide" delay={200} stagger={30} />
               <span className="kinetic-text bg-gradient-to-r from-accent via-secondary to-accent bg-clip-text text-transparent animate-gradient-x">
-                <AnimatedText text="Prescribe" animationType="bounce" delay={800} stagger={80} />
+                <AnimatedText text=" Prescribe" animationType="bounce" delay={800} stagger={80} />
               </span>
-              <AnimatedText text=" Your Medications" animationType="fade" delay={1200} stagger={40} />
+              <br className="hidden md:block" />
+              <AnimatedText text="Your Medications" animationType="fade" delay={1200} stagger={40} />
             </h1>
 
             <p
@@ -88,7 +89,7 @@ export function HeroSection() {
             </p>
 
             <Card
-              className={`mx-auto mt-16 max-w-3xl p-8 glass-card border border-border/30 shadow-2xl transition-all duration-1000 delay-[2000ms] card-3d hover:shadow-3xl ${
+              className={`mx-auto mt-10 max-w-3xl p-6 glass-card border border-border/30 shadow-2xl transition-all duration-1000 delay-[2000ms] card-3d hover:shadow-3xl ${
                 isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
               }`}
             >
@@ -127,7 +128,7 @@ export function HeroSection() {
             </Card>
 
             <div
-              className={`mt-16 grid grid-cols-1 gap-8 md:grid-cols-3 transition-all duration-1000 delay-[2200ms] ${
+              className={`mt-10 grid grid-cols-1 gap-6 md:grid-cols-3 transition-all duration-1000 delay-[2200ms] ${
                 isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
               }`}
             >

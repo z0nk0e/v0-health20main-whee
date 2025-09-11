@@ -115,7 +115,7 @@ export function StatsSection() {
   }, [])
 
   return (
-    <section ref={sectionRef} className="py-20 bg-muted/30 relative overflow-hidden">
+    <section ref={sectionRef} className="py-12 bg-muted/30 relative overflow-hidden">
       <div className="absolute inset-0">
         <div className="absolute top-10 left-10 w-32 h-32 bg-accent/5 rounded-full blur-2xl animate-pulse" />
         <div

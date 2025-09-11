@@ -1,9 +1,22 @@
 import { type NextRequest, NextResponse } from "next/server"
 
+import { requireAuth } from "@/lib/api/guard"
+import { getOrCreateUserAccess } from "@/lib/db/access"
+
 const API_BASE_URL = "https://api.rxprescribers.com"
 
 export async function GET(request: NextRequest) {
   try {
+    // Require auth and premium plan
+    const authResult = await requireAuth()
+    if (authResult instanceof NextResponse) return authResult
+    const { userId } = authResult
+
+    const access = await getOrCreateUserAccess(userId)
+    if (!(access.plan === "PREMIUM" || access.plan === "ANNUAL")) {
+      return NextResponse.json({ error: "Premium required", reason: "premium_only" }, { status: 402 })
+    }
+
     const { searchParams } = new URL(request.url)
 
     // Forward all query parameters to the external API
@@ -35,7 +48,7 @@ export async function GET(request: NextRequest) {
     let data
     try {
       data = JSON.parse(responseText)
-    } catch (parseError) {
+    } catch (_e) {
       console.error("[v0] Failed to parse premium API response as JSON:", responseText)
       return NextResponse.json(
         {

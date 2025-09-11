@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Playfair_Display, Source_Sans_3, Kalam, Dancing_Script } from "next/font/google"
 import { SessionProvider } from "next-auth/react"
 import { Analytics } from "@vercel/analytics/next"
+import { Providers } from "./providers"
 import "./globals.css"
 
 const playfair = Playfair_Display({
@@ -90,18 +91,20 @@ export default function RootLayout({
   }
 
   return (
-    <SessionProvider>
+     <SessionProvider>
       <PayPalWrapper>
-        <html
-          lang="en"
-          className={`${playfair.variable} ${sourceSans.variable} ${kalam.variable} ${dancingScript.variable} antialiased`}
-        >
-          <body className="font-sans">
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">{children}</div>
-            <Analytics />
-          </body>
-        </html>
-      </PayPalWrapper>
-    </SessionProvider>
+      <Providers>
+      <html
+      lang="en"
+    className={`${playfair.variable} ${sourceSans.variable} ${kalam.variable} ${dancingScript.variable} antialiased`}
+  >
+  <body className="font-sans">
+      <div className="min-h-screen bg-background">{children}</div>
+    <Analytics />
+  </body>
+  </html>
+  </Providers>
+  </PayPalWrapper>
+  </SessionProvider>
   )
 }

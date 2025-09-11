@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
     let data
     try {
       data = JSON.parse(responseText)
-    } catch (parseError) {
+    } catch (_e) {
       console.error("[v0] Failed to parse basic API response as JSON:", responseText)
       return NextResponse.json(
         {

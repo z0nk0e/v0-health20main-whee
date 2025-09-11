@@ -4,7 +4,7 @@ import { ArrowRight, Smartphone, Globe, Shield } from "@/lib/simple-icons"
 
 export function CTASection() {
   return (
-    <section className="py-20">
+    <section className="py-12">
       <div className="container px-4">
         <Card className="mx-auto max-w-4xl bg-gradient-to-r from-accent/5 to-accent/10 border-accent/20">
           <CardContent className="p-12 text-center">

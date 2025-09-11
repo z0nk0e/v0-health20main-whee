@@ -2,12 +2,22 @@ import { drizzle } from "drizzle-orm/mysql2"
 import mysql from "mysql2/promise"
 
 export function getDb() {
+  const host = process.env.DB_HOST
+  const user = process.env.DB_USER
+  const password = process.env.DB_PASSWORD
+  const database = process.env.DB_NAME
+  const port = Number.parseInt(process.env.DB_PORT || "3306")
+
+  if (!host || !user || !password || !database) {
+    throw new Error("Database configuration missing. Set DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, and optionally DB_PORT.")
+  }
+
   const pool = mysql.createPool({
-    host: process.env.DB_HOST || "srv1850.hstgr.io",
-    user: process.env.DB_USER || "u883018350_admin",
-    password: process.env.DB_PASSWORD || "Gh0stredux2025!!!",
-    database: process.env.DB_NAME || "u883018350_prescribers_pd",
-    port: Number.parseInt(process.env.DB_PORT || "3306"),
+    host,
+    user,
+    password,
+    database,
+    port,
     connectionLimit: 1, // For serverless, limit to 1
     connectTimeout: 5000,
   })
