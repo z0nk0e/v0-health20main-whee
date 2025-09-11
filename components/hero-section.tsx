@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Search, MapPin, Clock, Shield, Sparkles } from "@/lib/simple-icons"
-import { AnimatedText } from "./animated-text"
 import { SearchOverlay } from "./search-overlay"
 
 export function HeroSection() {
@@ -70,15 +69,8 @@ export function HeroSection() {
               Trusted by 825K+ Healthcare Providers
             </Badge>
 
-            <h1 className="font-serif text-3xl font-bold tracking-tight md:text-6xl lg:text-7xl leading-tight md:leading-[1.1]">
-              <AnimatedText text="Find Authorized" animationType="slide" delay={200} stagger={30} />
-              <span className="kinetic-text bg-gradient-to-r from-accent via-secondary to-accent bg-clip-text text-transparent animate-gradient-x">
-                <AnimatedText text=" Prescribers" animationType="bounce" delay={800} stagger={80} />
-              </span>
-              <br className="block" aria-hidden="true" />
-              <AnimatedText text="of Your Specific" animationType="fade" delay={1200} stagger={40} />
-              <br className="block md:hidden" aria-hidden="true" />
-              <AnimatedText text=" Medications" animationType="fade" delay={1400} stagger={40} />
+            <h1 className="font-serif leading-tight tracking-tight text-[clamp(28px,5.5vw,56px)]">
+              Find <span className="font-extrabold text-indigo-600">Prescribers</span> for Your Medications
             </h1>
 
             <p
@@ -86,8 +78,7 @@ export function HeroSection() {
                 isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
               }`}
             >
-              Connect with qualified healthcare providers in your area who prescribe the specific medications you need.
-              Search our comprehensive database of over 4.5 million prescription records.
+              Search a database of 4.5M prescription records and connect with licensed providers in your area.
             </p>
 
             <Card
@@ -95,38 +86,37 @@ export function HeroSection() {
                 isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
               }`}
             >
-              <div className="space-y-6">
-                <div className="relative group">
-                  <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground transition-all duration-300 group-focus-within:text-accent group-focus-within:scale-110" />
-                  <Input
-                    placeholder="Enter medication name (e.g., Metformin, Lisinopril, Adderall)"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onFocus={handleSearchFocus}
-                    className="pl-12 h-14 text-lg glass-card border-border/30 transition-all duration-300 focus:ring-2 focus:ring-accent/30 hover:border-accent/50 cursor-pointer hover:shadow-lg"
-                  />
+              <form
+                className="w-full"
+                role="search"
+                aria-label="Search for medication or ZIP code"
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  setIsSearchOverlayOpen(true)
+                }}
+              >
+                <label htmlFor="hero-search" className="sr-only">
+                  Search medication or ZIP code
+                </label>
+                <div className="flex rounded-md shadow-sm overflow-hidden">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      id="hero-search"
+                      type="search"
+                      name="q"
+                      placeholder="Search medication or ZIP code"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-12 h-14 text-base border-border/30 focus:ring-2 focus:ring-accent/30"
+                      aria-required="true"
+                    />
+                  </div>
+                  <Button type="submit" className="px-5 h-14 bg-indigo-600 hover:bg-indigo-700">
+                    Search
+                  </Button>
                 </div>
-
-                <div className="relative group">
-                  <MapPin className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground transition-all duration-300 group-focus-within:text-accent group-focus-within:scale-110" />
-                  <Input
-                    placeholder="Enter your location (city, state, or ZIP code)"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    onFocus={handleSearchFocus}
-                    className="pl-12 h-14 text-lg glass-card border-border/30 transition-all duration-300 focus:ring-2 focus:ring-accent/30 hover:border-accent/50 cursor-pointer hover:shadow-lg"
-                  />
-                </div>
-
-                <Button
-                  size="lg"
-                  className="w-full h-16 text-lg font-semibold bg-gradient-to-r from-accent to-secondary hover:from-accent/90 hover:to-secondary/90 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] group border-0 rounded-xl"
-                  onClick={handleSearchFocus}
-                >
-                  <Search className="w-5 h-5 mr-3 transition-transform group-hover:scale-110 group-hover:rotate-12" />
-                  Find Providers Near Me
-                </Button>
-              </div>
+              </form>
             </Card>
 
             <div
