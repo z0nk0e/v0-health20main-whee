@@ -25,10 +25,24 @@ export async function POST(request: Request, context: { params: Promise<{ orderI
 
     console.log("[v0] PayPal payment captured:", capture.result)
 
-    // Here you would typically:
-    // 1. Store the transaction in your database
-    // 2. Update user's premium status
-    // 3. Send confirmation email
+    // Update user entitlements based on custom_id and planType
+    try {
+      const unit = capture.result?.purchase_units?.[0] as any
+      const custom = (unit?.custom_id as string) || ""
+      const [userId, planType] = custom.split(":")
+      if (userId) {
+        const { updateUserPlan } = await import("@/lib/db/access")
+        if (planType === "basic") {
+          await updateUserPlan(userId, "BASIC", 30)
+        } else if (planType === "premium") {
+          await updateUserPlan(userId, "PREMIUM", 30)
+        } else if (planType === "annual") {
+          await updateUserPlan(userId, "ANNUAL", 365)
+        }
+      }
+    } catch (e) {
+      console.error("[v0] Failed to update user plan from capture:", e)
+    }
 
     return NextResponse.json(capture.result)
   } catch (error) {

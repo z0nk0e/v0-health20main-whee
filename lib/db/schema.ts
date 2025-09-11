@@ -145,6 +145,23 @@ export const prescriberProfiles = mysqlTable(
   }),
 )
 
+// User access table for patient plans
+export const userAccess = mysqlTable(
+  "user_access",
+  {
+    userId: varchar("user_id", { length: 36 }).primaryKey().references(() => users.id),
+    plan: varchar("plan", { length: 20, enum: ["FREE", "BASIC", "PREMIUM", "ANNUAL"] }).notNull().default("FREE"),
+    searchesUsed: int("searches_used").notNull().default(0),
+    monthStart: timestamp("month_start"),
+    expiresAt: timestamp("expires_at"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => ({
+    userIdx: index("idx_user_access_user").on(table.userId),
+  }),
+)
+
 // Type exports for TypeScript inference
 export type UsZipcode = typeof usZipcodes.$inferSelect
 export type NpiDetail = typeof npiDetails.$inferSelect
@@ -155,3 +172,4 @@ export type Specialty = typeof specialties.$inferSelect
 export type State = typeof states.$inferSelect
 export type User = typeof users.$inferSelect
 export type PrescriberProfile = typeof prescriberProfiles.$inferSelect
+export type UserAccess = typeof userAccess.$inferSelect

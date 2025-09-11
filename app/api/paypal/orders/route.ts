@@ -98,6 +98,14 @@ function calculateTotal(items?: PayPalOrderItem[], planType?: keyof typeof PRICI
 
 export async function POST(request: NextRequest) {
   try {
+    // Require auth so we can attach user to the order
+    const { auth } = await import("@/auth")
+    const session = await auth()
+    const userId = session?.user?.id
+    if (!userId) {
+      return NextResponse.json({ error: "Sign in required" }, { status: 401 })
+    }
+
     // Parse and validate request
     const body = await request.json()
     const { items, currency, planType } = validateOrderRequest(body)
@@ -124,6 +132,7 @@ export async function POST(request: NextRequest) {
         value: total.toFixed(2),
       },
       description,
+      custom_id: `${userId}:${planType || "custom"}`,
     }
     
     // Add item breakdown if items provided

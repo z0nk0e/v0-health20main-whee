@@ -72,37 +72,60 @@ async function verifyWebhookSignature(headers: Headers, rawBody: string): Promis
 }
 
 async function handleSubscriptionActivated(resource: any) {
-  const userId = resource?.custom_id
-  if (!userId) return
-  const db = getDb()
-  // default VERIFIED; FEATURED if plan id matches
-  const status = resource?.plan_id === process.env.PAYPAL_PLAN_FEATURED_ID ? "FEATURED" : "VERIFIED"
-  const expires = new Date()
-  expires.setMonth(expires.getMonth() + 1)
-  await db
-    .update(prescriberProfiles)
-    .set({ subscriptionStatus: status as any, subscriptionExpires: expires, verified: true })
-    .where(eq(prescriberProfiles.userId, userId))
+  const planId = resource?.plan_id as string | undefined
+  // If this is a prescriber plan, update prescriberProfiles via custom_id
+  if (planId && (planId === process.env.PAYPAL_PLAN_VERIFIED_ID || planId === process.env.PAYPAL_PLAN_FEATURED_ID)) {
+    const userId = resource?.custom_id
+    if (!userId) return
+    const db = getDb()
+    const status = planId === process.env.PAYPAL_PLAN_FEATURED_ID ? "FEATURED" : "VERIFIED"
+    const expires = new Date(); expires.setMonth(expires.getMonth() + 1)
+    await db.update(prescriberProfiles)
+      .set({ subscriptionStatus: status as any, subscriptionExpires: expires, verified: true })
+      .where(eq(prescriberProfiles.userId, userId))
+    return
+  }
+  // Else treat as patient plan: update user_access
+  const { updateUserPlan } = await import("@/lib/db/access")
+  const userIdFromCustom = resource?.custom_id as string | undefined
+  const basicId = process.env.PAYPAL_PLAN_BASIC_ID
+  const premiumId = process.env.PAYPAL_PLAN_PREMIUM_ID
+  const annualId = process.env.PAYPAL_PLAN_ANNUAL_ID
+  if (!planId) return
+  if (!userIdFromCustom) return // for client-created subscriptions custom_id may be missing; rely on manual activation endpoint
+  if (planId === basicId) await updateUserPlan(userIdFromCustom, "BASIC", 30)
+  else if (planId === premiumId) await updateUserPlan(userIdFromCustom, "PREMIUM", 30)
+  else if (planId === annualId) await updateUserPlan(userIdFromCustom, "ANNUAL", 365)
 }
 
 async function handleSubscriptionCancelled(resource: any) {
-  const userId = resource?.custom_id
+  const planId = resource?.plan_id as string | undefined
+  const userId = resource?.custom_id as string | undefined
   if (!userId) return
   const db = getDb()
-  await db
-    .update(prescriberProfiles)
-    .set({ subscriptionStatus: "FREE", subscriptionExpires: null, verified: false })
-    .where(eq(prescriberProfiles.userId, userId))
+  if (planId && (planId === process.env.PAYPAL_PLAN_VERIFIED_ID || planId === process.env.PAYPAL_PLAN_FEATURED_ID)) {
+    await db.update(prescriberProfiles)
+      .set({ subscriptionStatus: "FREE", subscriptionExpires: null, verified: false })
+      .where(eq(prescriberProfiles.userId, userId))
+    return
+  }
+  const { updateUserPlan } = await import("@/lib/db/access")
+  await updateUserPlan(userId, "FREE")
 }
 
 async function handleSubscriptionSuspended(resource: any) {
-  const userId = resource?.custom_id
+  const planId = resource?.plan_id as string | undefined
+  const userId = resource?.custom_id as string | undefined
   if (!userId) return
   const db = getDb()
-  await db
-    .update(prescriberProfiles)
-    .set({ subscriptionExpires: new Date(), verified: false })
-    .where(eq(prescriberProfiles.userId, userId))
+  if (planId && (planId === process.env.PAYPAL_PLAN_VERIFIED_ID || planId === process.env.PAYPAL_PLAN_FEATURED_ID)) {
+    await db.update(prescriberProfiles)
+      .set({ subscriptionExpires: new Date(), verified: false })
+      .where(eq(prescriberProfiles.userId, userId))
+    return
+  }
+  const { updateUserPlan } = await import("@/lib/db/access")
+  await updateUserPlan(userId, "FREE")
 }
 
 export async function POST(request: NextRequest) {

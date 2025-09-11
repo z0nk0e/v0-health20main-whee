@@ -1,10 +1,24 @@
-
 import { type NextRequest, NextResponse } from "next/server"
+import { auth } from "@/auth"
+import { getOrCreateUserAccess, canConsumeSearch, consumeSearch } from "@/lib/db/access"
 
 const API_BASE_URL = "https://api.rxprescribers.com"
 
 export async function GET(request: NextRequest) {
   try {
+    // Enforce auth and plan entitlements
+    const session = await auth()
+    const userId = session?.user?.id
+    if (!userId) {
+      return NextResponse.json({ error: "Sign in required" }, { status: 401 })
+    }
+
+    const access = await getOrCreateUserAccess(userId)
+    const gate = await canConsumeSearch(userId)
+    if (!gate.allowed) {
+      return NextResponse.json({ error: "Upgrade required", reason: gate.reason }, { status: 402 })
+    }
+
     const { searchParams } = new URL(request.url)
 
     // Forward all query parameters to the external API
@@ -49,9 +63,12 @@ export async function GET(request: NextRequest) {
 
     console.log("[v0] Basic search results received:", data.results_count || 0, "results")
 
+    // Record consumption for BASIC users
+    await consumeSearch(userId)
+
     return NextResponse.json({
       ...data,
-      is_premium: false, // Basic API returns blurred results
+      is_premium: access.plan !== "FREE",
     })
   } catch (error) {
     console.error("[v0] API proxy error:", error)

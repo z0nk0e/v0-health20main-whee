@@ -106,6 +106,25 @@ export default function HomePage() {
     }
   }
 
+  const [plan, setPlan] = useState<string | null>(null)
+  const [gate, setGate] = useState(false)
+
+  useEffect(() => {
+    const fetchAccess = async () => {
+      try {
+        const res = await fetch('/api/me/access')
+        if (res.ok) {
+          const data = await res.json()
+          setPlan(data.plan)
+          setGate(data.plan === 'FREE')
+        } else if (res.status === 401) {
+          setGate(true)
+        }
+      } catch {}
+    }
+    fetchAccess()
+  }, [])
+
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       <MolecularBackground />
@@ -125,41 +144,55 @@ export default function HomePage() {
               </div>
             </div>
 
-            <SearchInterface
-              onSearch={handleSearch}
-              isSearching={isSearching}
-              userLocation={userLocation}
-              defaultQuery={searchQuery}
-              onQueryChange={setSearchQuery}
-            />
+            {!gate ? (
+              <SearchInterface
+                onSearch={handleSearch}
+                isSearching={isSearching}
+                userLocation={userLocation}
+                defaultQuery={searchQuery}
+                onQueryChange={setSearchQuery}
+              />
+            ) : (
+              <div className="border border-border rounded-md p-6 bg-card/50">
+                <h2 className="text-xl font-semibold mb-2">Upgrade required</h2>
+                <p className="text-muted-foreground mb-4">Sign in and upgrade to Basic, Premium, or Annual to access provider search.</p>
+                <div className="flex gap-3">
+                  <a href="/auth/signin" className="px-4 py-2 rounded bg-accent text-accent-foreground">Sign in</a>
+                  <a href="/auth/signup" className="px-4 py-2 rounded border">Create account</a>
+                  <a href="/for-providers" className="px-4 py-2 rounded border">Learn more</a>
+                </div>
+              </div>
+            )}
           </div>
         </header>
 
         {/* Main content area */}
-        <div className="flex-1 flex">
-          {/* Map area */}
-          <div className="flex-1 relative">
-            <SonarMap
-              userLocation={userLocation}
-              prescribers={searchResults}
-              selectedPrescriber={selectedPrescriber}
-              onPrescriberSelect={setSelectedPrescriber}
-              isSearching={isSearching}
-              searchQuery={searchQuery}
-            />
-          </div>
-
-          {/* Results sidebar */}
-          {searchResults.length > 0 && (
-            <div className="w-96 border-l border-border/20 bg-card/50 backdrop-blur-sm">
-              <PrescriberResults
-                results={searchResults}
+        {!gate && (
+          <div className="flex-1 flex">
+            {/* Map area */}
+            <div className="flex-1 relative">
+              <SonarMap
+                userLocation={userLocation}
+                prescribers={searchResults}
                 selectedPrescriber={selectedPrescriber}
                 onPrescriberSelect={setSelectedPrescriber}
+                isSearching={isSearching}
+                searchQuery={searchQuery}
               />
             </div>
-          )}
-        </div>
+
+            {/* Results sidebar */}
+            {searchResults.length > 0 && (
+              <div className="w-96 border-l border-border/20 bg-card/50 backdrop-blur-sm">
+                <PrescriberResults
+                  results={searchResults}
+                  selectedPrescriber={selectedPrescriber}
+                  onPrescriberSelect={setSelectedPrescriber}
+                />
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )

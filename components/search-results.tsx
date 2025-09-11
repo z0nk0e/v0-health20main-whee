@@ -100,6 +100,7 @@ const PayPalButtonsComponent = ({
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                   items: [{ name: `RX Prescribers ${tier.name}`, price: tier.price, qty: 1 }],
+                  planType: selectedTier,
                 }),
               })
               if (!response.ok) throw new Error(`Create order failed: ${response.status}`)
