@@ -13,6 +13,7 @@ interface SearchInterfaceProps {
   userLocation: { lat: number; lng: number } | null
   defaultQuery?: string
   onQueryChange?: (value: string) => void
+  upgradeChip?: boolean
 }
 
 interface DrugSuggestion {
@@ -21,7 +22,7 @@ interface DrugSuggestion {
   category: string | null
 }
 
-export function SearchInterface({ onSearch, isSearching, userLocation, defaultQuery, onQueryChange }: SearchInterfaceProps) {
+export function SearchInterface({ onSearch, isSearching, userLocation, defaultQuery, onQueryChange, upgradeChip }: SearchInterfaceProps) {
   const [query, setQuery] = useState("")
   const [suggestions, setSuggestions] = useState<DrugSuggestion[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
@@ -79,9 +80,16 @@ export function SearchInterface({ onSearch, isSearching, userLocation, defaultQu
       <form onSubmit={handleSubmit} className="flex gap-4 items-end">
         {/* Search input with autocomplete */}
         <div className="flex-1 relative">
-          <label htmlFor="pharma-search" className="block text-sm font-medium text-foreground mb-2">
-            Pharmaceutical Name
-          </label>
+          <div className="flex items-center justify-between mb-2">
+            <label htmlFor="pharma-search" className="block text-sm font-medium text-foreground">
+              Pharmaceutical Name
+            </label>
+            {upgradeChip && (
+              <a href="/upgrade" className="ml-2 inline-flex items-center rounded px-2 py-1 text-xs border border-amber-300 bg-amber-100 text-amber-900">
+                Upgrade
+              </a>
+            )}
+          </div>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input

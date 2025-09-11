@@ -155,6 +155,7 @@ export const userAccess = mysqlTable(
     monthStart: timestamp("month_start"),
     expiresAt: timestamp("expires_at"),
     createdAt: timestamp("created_at").defaultNow(),
+    subscriptionId: varchar("subscription_id", { length: 64 }),
     updatedAt: timestamp("updated_at").defaultNow(),
   },
   (table) => ({

@@ -14,5 +14,6 @@ export async function GET() {
     searchesUsed: access.searchesUsed ?? 0,
     monthStart: access.monthStart,
     expiresAt: access.expiresAt,
+    subscriptionId: access.subscriptionId,
   })
 }

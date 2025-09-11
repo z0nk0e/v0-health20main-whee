@@ -47,7 +47,7 @@ export default function SignUpPage() {
       if (response.ok) {
         setSuccess(true)
         setTimeout(() => {
-          router.push("/auth/signin")
+          router.push("/upgrade")
         }, 2000)
       } else {
         const data = await response.json().catch(() => ({}))

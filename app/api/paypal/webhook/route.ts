@@ -93,9 +93,10 @@ async function handleSubscriptionActivated(resource: any) {
   const annualId = process.env.PAYPAL_PLAN_ANNUAL_ID
   if (!planId) return
   if (!userIdFromCustom) return // for client-created subscriptions custom_id may be missing; rely on manual activation endpoint
-  if (planId === basicId) await updateUserPlan(userIdFromCustom, "BASIC", 30)
-  else if (planId === premiumId) await updateUserPlan(userIdFromCustom, "PREMIUM", 30)
-  else if (planId === annualId) await updateUserPlan(userIdFromCustom, "ANNUAL", 365)
+  const subscriptionId = resource?.id as string | undefined
+  if (planId === basicId) await updateUserPlan(userIdFromCustom, "BASIC", 30, subscriptionId)
+  else if (planId === premiumId) await updateUserPlan(userIdFromCustom, "PREMIUM", 30, subscriptionId)
+  else if (planId === annualId) await updateUserPlan(userIdFromCustom, "ANNUAL", 365, subscriptionId)
 }
 
 async function handleSubscriptionCancelled(resource: any) {

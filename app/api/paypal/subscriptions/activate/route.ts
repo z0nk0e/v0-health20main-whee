@@ -37,20 +37,24 @@ export async function POST(request: Request) {
     if (customId && customId.includes(":")) {
       userId = customId.split(":")[0]
     }
+    if (!userId) {
+      const { auth } = await import("@/auth")
+      const session = await auth()
+      userId = session?.user?.id
+    }
 
     const basicId = process.env.PAYPAL_PLAN_BASIC_ID
     const premiumId = process.env.PAYPAL_PLAN_PREMIUM_ID
     const annualId = process.env.PAYPAL_PLAN_ANNUAL_ID
 
     if (!userId) {
-      // If we don't have custom_id, return info for client to follow-up with user binding
-      return NextResponse.json({ ok: true, note: "No userId bound to subscription", planId, subscription: sub })
+      return NextResponse.json({ error: "Sign in required to bind subscription" }, { status: 401 })
     }
 
     const { updateUserPlan } = await import("@/lib/db/access")
-    if (planId === basicId) await updateUserPlan(userId, "BASIC", 30)
-    else if (planId === premiumId) await updateUserPlan(userId, "PREMIUM", 30)
-    else if (planId === annualId) await updateUserPlan(userId, "ANNUAL", 365)
+    if (planId === basicId) await updateUserPlan(userId, "BASIC", 30, subscriptionId)
+    else if (planId === premiumId) await updateUserPlan(userId, "PREMIUM", 30, subscriptionId)
+    else if (planId === annualId) await updateUserPlan(userId, "ANNUAL", 365, subscriptionId)
 
     return NextResponse.json({ ok: true })
   } catch (e) {

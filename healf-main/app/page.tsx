@@ -151,6 +151,7 @@ export default function HomePage() {
                 userLocation={userLocation}
                 defaultQuery={searchQuery}
                 onQueryChange={setSearchQuery}
+                upgradeChip={plan === 'FREE'}
               />
             ) : (
               <div className="border border-border rounded-md p-6 bg-card/50">

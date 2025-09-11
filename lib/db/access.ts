@@ -13,14 +13,14 @@ export async function getOrCreateUserAccess(userId: string) {
   return created[0]
 }
 
-export async function updateUserPlan(userId: string, plan: Plan, durationDays?: number) {
+export async function updateUserPlan(userId: string, plan: Plan, durationDays?: number, subscriptionId?: string) {
   const db = getDb()
   const expiresAt = durationDays ? new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000) : null
   await db
     .insert(userAccess)
-    .values({ userId, plan, searchesUsed: 0, monthStart: new Date(), expiresAt: expiresAt ?? undefined })
+    .values({ userId, plan, searchesUsed: 0, monthStart: new Date(), expiresAt: expiresAt ?? undefined, subscriptionId })
     .onDuplicateKeyUpdate({
-      set: { plan, searchesUsed: 0, monthStart: new Date(), expiresAt: expiresAt ?? null, updatedAt: new Date() },
+      set: { plan, searchesUsed: 0, monthStart: new Date(), expiresAt: expiresAt ?? null, subscriptionId: subscriptionId ?? null, updatedAt: new Date() },
     })
 }
 
