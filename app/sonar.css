@@ -1,0 +1,32 @@
+/* Sonar UI additions */
+:root {
+  --sonar-pulse: oklch(0.65 0.15 285 / 0.3);
+  --molecular-bg: oklch(0.98 0 0);
+}
+
+@theme inline {
+  --color-sonar-pulse: var(--sonar-pulse);
+  --color-molecular-bg: var(--molecular-bg);
+  --color-prescriber-glow-high: oklch(0.6 0.2 140);
+  --color-prescriber-glow-medium: oklch(0.75 0.15 85);
+  --color-prescriber-glow-low: oklch(0.55 0.25 25);
+}
+
+@layer utilities {
+  @keyframes sonar-pulse {
+    0% { transform: scale(0); opacity: 1; }
+    100% { transform: scale(4); opacity: 0; }
+  }
+  @keyframes prescriber-glow {
+    0%,100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.1); }
+  }
+  @keyframes molecular-float {
+    0%,100% { transform: translateY(0px) rotate(0deg); }
+    33% { transform: translateY(-10px) rotate(120deg); }
+    66% { transform: translateY(5px) rotate(240deg); }
+  }
+  .sonar-pulse { animation: sonar-pulse 2s ease-out infinite; }
+  .prescriber-glow { animation: prescriber-glow 2s ease-in-out infinite; }
+  .molecular-float { animation: molecular-float 20s ease-in-out infinite; }
+}

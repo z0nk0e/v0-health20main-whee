@@ -3,15 +3,45 @@
 import { useEffect, useState } from "react"
 import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js"
 
-const basicId = process.env.NEXT_PUBLIC_PAYPAL_PLAN_BASIC_ID
-const premiumId = process.env.NEXT_PUBLIC_PAYPAL_PLAN_PREMIUM_ID
-const annualId = process.env.NEXT_PUBLIC_PAYPAL_PLAN_ANNUAL_ID
-
 export default function UpgradePage() {
-  const [clientId, setClientId] = useState<string | null>(null)
+  const [clientId, setClientId] = useState<string | null | undefined>(undefined)
+  const [plans, setPlans] = useState<
+    | { basicId: string | null; premiumId: string | null; annualId: string | null }
+    | undefined
+  >(undefined)
+
   useEffect(() => {
-    setClientId(process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || null)
+    let active = true
+    ;(async () => {
+      try {
+        const res = await fetch("/api/paypal/config", { cache: "no-store" })
+        const data = await res.json()
+        if (!active) return
+        setClientId(data.clientId || null)
+        setPlans(data.plans || { basicId: null, premiumId: null, annualId: null })
+      } catch (e) {
+        if (!active) return
+        setClientId(null)
+        setPlans({ basicId: null, premiumId: null, annualId: null })
+      }
+    })()
+    return () => {
+      active = false
+    }
   }, [])
+
+  if (clientId === undefined || plans === undefined) {
+    return (
+      <div className="max-w-2xl mx-auto p-6">
+        <div className="flex items-center justify-between mb-4">
+          <a href="#" aria-label="Go back" onClick={(e)=>{e.preventDefault(); history.back()}} className="px-3 py-1.5 rounded border">Back</a>
+          <a href="/" aria-label="Close upgrade" className="px-3 py-1.5 rounded border">✕</a>
+        </div>
+        <h1 className="text-2xl font-bold mb-2">Upgrade</h1>
+        <p className="text-muted-foreground">Loading payment options…</p>
+      </div>
+    )
+  }
 
   if (!clientId) {
     return (
@@ -21,7 +51,7 @@ export default function UpgradePage() {
           <a href="/" aria-label="Close upgrade" className="px-3 py-1.5 rounded border">✕</a>
         </div>
         <h1 className="text-2xl font-bold mb-2">Upgrade</h1>
-        <p className="text-muted-foreground">PayPal is not configured. Set NEXT_PUBLIC_PAYPAL_CLIENT_ID env var.</p>
+        <p className="text-muted-foreground">PayPal isn’t configured on the server. Set PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET.</p>
       </div>
     )
   }
@@ -38,11 +68,11 @@ export default function UpgradePage() {
       <PayPalScriptProvider options={{ clientId, intent: "subscription", vault: true }}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <PlanCard title="Basic" price="$9.99/mo" description="Single-drug searches, all substances, 5 searches/month">
-            {basicId ? (
+            {plans?.basicId ? (
               <>
                 <PayPalButtons
                   style={{ layout: "vertical" }}
-                  createSubscription={(data, actions) => actions.subscription.create({ plan_id: basicId! })}
+                  createSubscription={(data, actions) => actions.subscription.create({ plan_id: plans.basicId! })}
                   onApprove={async (data) => {
                     try {
                       await fetch('/api/paypal/subscriptions/activate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ subscriptionId: data.subscriptionID }) })
@@ -55,16 +85,16 @@ export default function UpgradePage() {
                 </div>
               </>
             ) : (
-              <div className="text-sm text-muted-foreground">Missing NEXT_PUBLIC_PAYPAL_PLAN_BASIC_ID</div>
+              <div className="text-sm text-muted-foreground">Basic plan is not configured.</div>
             )}
           </PlanCard>
 
           <PlanCard title="Premium" price="$19.99/mo" description="Multi-drug, multi-zipcode, unlimited, priority support">
-            {premiumId ? (
+            {plans?.premiumId ? (
               <>
                 <PayPalButtons
                   style={{ layout: "vertical" }}
-                  createSubscription={(data, actions) => actions.subscription.create({ plan_id: premiumId! })}
+                  createSubscription={(data, actions) => actions.subscription.create({ plan_id: plans.premiumId! })}
                   onApprove={async (data) => {
                     try {
                       await fetch('/api/paypal/subscriptions/activate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ subscriptionId: data.subscriptionID }) })
@@ -77,16 +107,16 @@ export default function UpgradePage() {
                 </div>
               </>
             ) : (
-              <div className="text-sm text-muted-foreground">Missing NEXT_PUBLIC_PAYPAL_PLAN_PREMIUM_ID</div>
+              <div className="text-sm text-muted-foreground">Premium plan is not configured.</div>
             )}
           </PlanCard>
 
           <PlanCard title="Annual Premium" price="$199.99/yr" description="Everything in Premium, 2 months free, priority customer support">
-            {annualId ? (
+            {plans?.annualId ? (
               <>
                 <PayPalButtons
                   style={{ layout: "vertical" }}
-                  createSubscription={(data, actions) => actions.subscription.create({ plan_id: annualId! })}
+                  createSubscription={(data, actions) => actions.subscription.create({ plan_id: plans.annualId! })}
                   onApprove={async (data) => {
                     try {
                       await fetch('/api/paypal/subscriptions/activate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ subscriptionId: data.subscriptionID }) })
@@ -99,7 +129,7 @@ export default function UpgradePage() {
                 </div>
               </>
             ) : (
-              <div className="text-sm text-muted-foreground">Missing NEXT_PUBLIC_PAYPAL_PLAN_ANNUAL_ID</div>
+              <div className="text-sm text-muted-foreground">Annual plan is not configured.</div>
             )}
           </PlanCard>
         </div>

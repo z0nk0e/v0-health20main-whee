@@ -18,6 +18,15 @@ interface SearchOverlayProps {
 export function SearchOverlay({ isOpen, onClose, initialQuery = "", initialLocation = "" }: SearchOverlayProps) {
   const [medications, setMedications] = useState<string[]>(initialQuery ? [initialQuery] : [""])
   const [location, setLocation] = useState(initialLocation)
+
+  // Sync prefill values when overlay opens or props change
+  useEffect(() => {
+    setMedications(initialQuery ? [initialQuery] : [""])
+  }, [initialQuery, isOpen])
+
+  useEffect(() => {
+    setLocation(initialLocation)
+  }, [initialLocation, isOpen])
   const [searchRadius, setSearchRadius] = useState(25)
   const [searchResults, setSearchResults] = useState<SearchResponse | null>(null)
   const [isLoading, setIsLoading] = useState(false)

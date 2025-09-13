@@ -93,10 +93,12 @@ export function HeroSection() {
                 onSubmit={(e) => {
                   e.preventDefault()
                   const trimmed = searchQuery.trim()
-                  const zipMatch = trimmed.match(/^\d{5}(?:-\d{4})?$/)
+                  const zipMatch = trimmed.match(/\b\d{5}(?:-\d{4})?\b/)
                   if (zipMatch) {
-                    setLocation(trimmed.slice(0, 5))
-                    setSearchQuery("")
+                    const zip = zipMatch[0]
+                    setLocation(zip.slice(0, 5))
+                    const remaining = trimmed.replace(zip, "").trim()
+                    setSearchQuery(remaining)
                   }
                   setIsSearchOverlayOpen(true)
                 }}
@@ -123,6 +125,9 @@ export function HeroSection() {
                   </Button>
                 </div>
               </form>
+              <div className="mt-4 text-center">
+                <a href="/explore" className="text-sm underline text-muted-foreground hover:text-accent">Try the new advanced search →</a>
+              </div>
             </Card>
 
             <div

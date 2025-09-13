@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useCallback, useMemo } from "react"
+import { useState, useCallback, useMemo, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -74,13 +74,40 @@ const PayPalButtonsComponent = ({
 }) => {
   const [isProcessing, setIsProcessing] = useState(false)
   const tier = PRICING_TIERS[selectedTier]
-  const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
+  const [clientId, setClientId] = useState<string | null | undefined>(undefined)
 
-  // If client ID missing, show helpful message
+  useEffect(() => {
+    let active = true
+    ;(async () => {
+      try {
+        const res = await fetch("/api/paypal/config", { cache: "no-store" })
+        const data = await res.json()
+        if (!active) return
+        setClientId(data.clientId || null)
+      } catch (e) {
+        if (!active) return
+        setClientId(null)
+      }
+    })()
+    return () => {
+      active = false
+    }
+  }, [])
+
+  // If client ID loading or missing, show helpful message
+  if (clientId === undefined) {
+    return (
+      <div className="text-center p-4 border border-gray-200 rounded-lg bg-gray-50">
+        <p className="text-sm text-gray-600 mb-2">Loading payment options…</p>
+        <Button onClick={onCancel} variant="outline" className="bg-transparent">Close</Button>
+      </div>
+    )
+  }
+
   if (!clientId) {
     return (
       <div className="text-center p-4 border border-gray-200 rounded-lg bg-gray-50">
-        <p className="text-sm text-gray-600 mb-2">PayPal is not configured. Set NEXT_PUBLIC_PAYPAL_CLIENT_ID.</p>
+        <p className="text-sm text-gray-600 mb-2">PayPal isn’t configured on the server. Set PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET.</p>
         <Button onClick={onCancel} variant="outline" className="bg-transparent">Close</Button>
       </div>
     )

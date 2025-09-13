@@ -1,6 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { getOrCreateUserAccess, canConsumeSearch, consumeSearch } from "@/lib/db/access"
+import { z } from "zod"
+import { searchPrescribers } from "@/lib/db/queries"
 
 const API_BASE_URL = "https://api.rxprescribers.com"
 
@@ -73,5 +75,47 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("[v0] API proxy error:", error)
     return NextResponse.json({ error: "Failed to search prescribers" }, { status: 500 })
+  }
+}
+
+// New: advanced DB-backed search for the Explore UI
+const searchSchema = z.object({
+  pharmaName: z.string().min(1, "Pharmaceutical name is required"),
+  lat: z.number().min(-90).max(90),
+  lng: z.number().min(-180).max(180),
+  radius: z.number().min(1).max(100).default(25),
+})
+
+export async function POST(request: NextRequest) {
+  try {
+    const session = await auth()
+    const userId = session?.user?.id
+    if (!userId) {
+      return NextResponse.json({ error: "Sign in required" }, { status: 401 })
+    }
+
+    const gate = await canConsumeSearch(userId)
+    if (!gate.allowed) {
+      return NextResponse.json({ error: "Upgrade required", reason: gate.reason }, { status: 402 })
+    }
+
+    const body = await request.json()
+    const validated = searchSchema.parse(body)
+
+    const results = await searchPrescribers(validated)
+
+    await consumeSearch(userId)
+
+    return NextResponse.json({
+      results,
+      totalCount: results.length,
+      searchId: crypto.randomUUID(),
+    })
+  } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: "Invalid request data", details: error.errors }, { status: 400 })
+    }
+    console.error("[search POST] error:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

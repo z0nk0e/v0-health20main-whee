@@ -1,74 +1,128 @@
-import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
-
+import { NextResponse } from 'next/server'
+import { auth } from '@/auth'
+import { getDb } from '@/lib/db/connection'
+import { usZipcodes, drugs } from '@/lib/db/schema'
+import { eq } from 'drizzle-orm'
+import { searchPrescribers } from '@/lib/db/queries'
+import { getOrCreateUserAccess, canConsumeSearch, consumeSearch } from '@/lib/db/access'
 
 export async function POST(request: Request) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Sign in required' }, { status: 401 });
-    }
-    // 1. Parse the request body from the client
-    const body = await request.json();
-    // Log the exact body received from the client for definitive debugging
-    console.log("--- Prescriber Search API Received Body ---", JSON.stringify(body, null, 2));
-
-    // The frontend sends `pharmaName`, `zip`, `radius`, etc.
-    const { pharmaName, zip, radius } = body;
-
-    // 2. Validate the input to ensure we have something to search for
-    // The external API requires a ZIP code for all searches.
-    if (!zip) {
-      return NextResponse.json(
-        { error: 'A ZIP code is required for the search. The request from the browser did not include one.' },
-        { status: 400 }
-      );
+    const session = await auth()
+    const userId = session?.user?.id
+    if (!userId) {
+      return NextResponse.json({ error: 'Sign in required' }, { status: 401 })
     }
 
-    // 3. Construct the external API URL safely
-    const externalApiUrl = new URL('https://api.rxprescribers.com/api.php');
-    // Map `pharmaName` to `drug` for the external API
-    if (pharmaName) {
-      externalApiUrl.searchParams.append('drug', String(pharmaName));
-    }
-    if (zip) {
-      externalApiUrl.searchParams.append('zip', String(zip));
-    }
-    // Pass radius through if it exists
-    if (radius) {
-      externalApiUrl.searchParams.append('radius', String(radius));
-    }
+    const body = await request.json()
+    console.log('[prescriber-search] body', body)
 
-    // 4. Make the GET request to the external API
-    const apiResponse = await fetch(externalApiUrl.toString());
+    const pharmaName = String(body?.pharmaName || '').trim()
+    const zip = String(body?.zip || '').trim()
+    const radius = Number(body?.radius || 25)
 
-    // 5. Check if the external API call was successful
-    if (!apiResponse.ok) {
-      // If not, log the error and forward a descriptive error to the client
-      const errorText = await apiResponse.text();
-      console.error(`External API Error: ${apiResponse.status} ${apiResponse.statusText}`, errorText);
-      return NextResponse.json(
-        { error: 'Failed to fetch data from the external provider.' },
-        { status: apiResponse.status }
-      );
+    if (!pharmaName) {
+      return NextResponse.json({ error: 'pharmaName is required' }, { status: 400 })
+    }
+    if (!zip || !/^\d{5}$/.test(zip)) {
+      return NextResponse.json({ error: 'Valid 5-digit ZIP is required' }, { status: 400 })
     }
 
-    // 6. Parse the JSON response from the external API and send it back to our client
-    const data = await apiResponse.json();
-    return NextResponse.json(data);
+    // Entitlement gate (FREE blocked, BASIC limited)
+    const access = await getOrCreateUserAccess(userId)
+    const gate = await canConsumeSearch(userId)
+    if (!gate.allowed) {
+      return NextResponse.json({ error: 'Upgrade required', reason: gate.reason }, { status: 402 })
+    }
 
+    const db = getDb()
+
+    // Lookup ZIP -> lat/lng, city, state
+    const zipRows = await db
+      .select({
+        zipCode: usZipcodes.zipCode,
+        latitude: usZipcodes.latitude,
+        longitude: usZipcodes.longitude,
+        city: usZipcodes.city,
+        state: usZipcodes.state,
+      })
+      .from(usZipcodes)
+      .where(eq(usZipcodes.zipCode, zip))
+      .limit(1)
+
+    const zipRow = zipRows[0]
+    if (!zipRow) {
+      return NextResponse.json({ error: 'ZIP not found' }, { status: 400 })
+    }
+
+    const lat = Number(zipRow.latitude)
+    const lng = Number(zipRow.longitude)
+
+    // Fetch drug meta for response fields
+    const drugRows = await db
+      .select({
+        brandName: drugs.brandName,
+        therapeuticClass: drugs.therapeuticClass,
+        controlledSubstance: drugs.controlledSubstance,
+      })
+      .from(drugs)
+      .where(eq(drugs.brandName, pharmaName.toUpperCase()))
+      .limit(1)
+    const drugMeta = drugRows[0]
+
+    // Execute new DB-backed search
+    const results = await searchPrescribers({ pharmaName, lat, lng, radius })
+
+    // Record consumption for BASIC users
+    await consumeSearch(userId)
+
+    // Shape response to existing SearchResponse contract
+    const response = {
+      search_location: {
+        zip,
+        city: zipRow.city,
+        state: zipRow.state,
+      },
+      search_params: {
+        drug: pharmaName,
+        drug_class: drugMeta?.therapeuticClass || '',
+        therapeutic_class: drugMeta?.therapeuticClass || '',
+        radius_miles: radius,
+      },
+      results_count: results.length,
+      prescribers: results.map((r) => ({
+        npi: Number(r.npi),
+        name: r.name,
+        specialty: r.specialty || '',
+        specialty_group: '',
+        address: {
+          street: r.address.street || '',
+          city: r.address.city || '',
+          state: r.address.state || '',
+          zip: r.address.zipCode || zip,
+        },
+        drug: {
+          brand_name: pharmaName,
+          generic_name: '',
+          drug_class: drugMeta?.therapeuticClass || '',
+          therapeutic_class: drugMeta?.therapeuticClass || '',
+          drug_family: '',
+          controlled_substance: Boolean(drugMeta?.controlledSubstance),
+          controlled_schedule: '',
+          route_of_administration: '',
+        },
+        distance_miles: Number(r.distance),
+        total_claims: Number(r.totalClaims),
+      })),
+      is_premium: access.plan !== 'FREE',
+    }
+
+    return NextResponse.json(response)
   } catch (error) {
-    // 7. Catch any other errors (e.g., malformed JSON from client, network issues)
-    console.error('An unexpected error occurred in /api/prescriber-search:', error);
-
-    // Specifically check for JSON parsing errors from the initial request
+    console.error('[prescriber-search] error', error)
     if (error instanceof SyntaxError) {
-      return NextResponse.json({ error: 'Invalid JSON in request body.' }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid JSON in request body.' }, { status: 400 })
     }
-
-    return NextResponse.json(
-      { error: 'An internal server error occurred.' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'An internal server error occurred.' }, { status: 500 })
   }
 }
